@@ -1,4 +1,8 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# koltuktasarimsite
+
+Koltuk / ofis sandalyesi vitrin sitesi — [Next.js](https://nextjs.org) (App Router).
+
+Bu depo, `create-next-app` ile başlatılmış bir projeden türetilmiştir.
 
 ## Getting Started
 

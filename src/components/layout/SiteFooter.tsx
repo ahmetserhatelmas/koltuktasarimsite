@@ -19,15 +19,6 @@ function IconWA(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function IconPackage(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" {...props}>
-      <path d="M12 3l9 4.5v9L12 21l-9-4.5v-9L12 3Z" strokeLinejoin="round" />
-      <path d="M12 12 21 7.5M12 12v9M12 12 3 7.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 const footerCols = [
   {
     title: "Kategoriler",
@@ -46,7 +37,6 @@ const footerCols = [
       ["Project & Export", "/#export"],
       ["Referanslar", "/#referans"],
       ["Sıkça Sorulanlar", "/#sss"],
-      ["Hesap Numaraları", "/#hesap"],
       ["Bize Ulaşın", "/iletisim"],
     ],
   },
@@ -55,23 +45,8 @@ const footerCols = [
     links: [
       ["K.V.K.K. Bilgilendirmesi", "/#kvkk"],
       ["Gizlilik Sözleşmesi", "/#gizlilik"],
-      ["Mesafeli Satış Sözleşmesi", "/#mesafeli"],
-      ["İade ve Değişim Koşulları", "/#iade"],
-      ["Üyelik Sözleşmesi", "/#uyelik"],
       ["Çerez Kullanımı", "/#cerez"],
       ["Çevre Politikası", "/#cevre"],
-    ],
-  },
-  {
-    title: "Alışveriş",
-    links: [
-      ["Yeni Üyelik", "/#uye"],
-      ["Üye Girişi", "/#giris"],
-      ["Siparişlerim", "/#siparis"],
-      ["Favori Ürünlerim", "/#favori"],
-      ["Şifremi Unuttum", "/#sifre"],
-      ["Alışveriş Sepetim", "/#sepet"],
-      ["Havale Bildirim Formu", "/#havale"],
     ],
   },
 ] as const;
@@ -97,7 +72,7 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-6">
+        <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
           {footerCols.map((col) => (
             <div key={col.title} className="lg:col-span-1">
               <p className="text-sm font-semibold text-zinc-900">{col.title}</p>
@@ -144,7 +119,7 @@ export function SiteFooter() {
           <p>
             Tüm hakları saklıdır © {new Date().getFullYear()} — {SITE_NAME}
           </p>
-          <p className="text-zinc-400">Demo vitrin sitesi</p>
+          <p className="text-zinc-400">Tanıtım sitesi</p>
         </div>
       </div>
     </footer>

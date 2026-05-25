@@ -65,13 +65,10 @@ const items = [
 
 export function TrustBar() {
   return (
-    <section className="border-b border-zinc-100 bg-zinc-50/60 py-10 sm:py-12">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+    <section className="border-y border-zinc-200 bg-white py-10 sm:py-12">
+      <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:gap-8 lg:px-8">
         {items.map(({ title, desc, Icon }) => (
-          <div
-            key={title}
-            className="flex gap-4 rounded-2xl border border-zinc-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          >
+          <div key={title} className="flex gap-4 border-l-2 border-zinc-900 pl-4">
             <Icon className="mt-1 h-8 w-8 shrink-0 text-zinc-900" />
             <div>
               <p className="text-sm font-semibold text-zinc-900">{title}</p>

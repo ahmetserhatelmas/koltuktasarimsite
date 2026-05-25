@@ -1,32 +1,24 @@
-import { BlogGrid } from "@/components/home/BlogGrid";
 import { BrandStory } from "@/components/home/BrandStory";
-import { CategoryCircles } from "@/components/home/CategoryCircles";
-import { FlagStrip } from "@/components/home/FlagStrip";
+import { CategoryShowcase } from "@/components/home/CategoryShowcase";
 import { HeroSlider } from "@/components/home/HeroSlider";
 import { ProductCarousel } from "@/components/home/ProductCarousel";
+import { ProjectsStrip } from "@/components/home/ProjectsStrip";
 import { TrustBar } from "@/components/home/TrustBar";
-import { dealProducts, featuredRound, newArrivals } from "@/lib/products";
+import { homeFeatured } from "@/lib/products";
 
 export default function HomePage() {
   return (
     <main className="flex-1">
       <HeroSlider />
-      <CategoryCircles items={featuredRound} />
+      <CategoryShowcase />
       <TrustBar />
       <ProductCarousel
-        id="firsat"
-        title="Fırsat Ürünleri"
-        subtitle="İndirimli ürün fiyatlarını kaçırmayın."
-        products={dealProducts}
+        id="one-cikan"
+        title="Öne çıkan ürünler"
+        subtitle="KoltukDunyam klasörünüzdeki modellerden seçilmiş vitrin."
+        products={homeFeatured}
       />
-      <ProductCarousel
-        id="yeni-gelenler"
-        title="Yeni Gelenler"
-        subtitle="En yeni ürünlerimizi inceleyin."
-        products={newArrivals}
-      />
-      <FlagStrip />
-      <BlogGrid />
+      <ProjectsStrip />
       <BrandStory />
     </main>
   );

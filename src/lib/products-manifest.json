@@ -1,0 +1,382 @@
+{
+  "bar": [
+    {
+      "id": "bar-110000419068584",
+      "name": "110000419068584",
+      "image": "/products/bar/bar-110000419068584.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "bar-karekromtablal",
+      "name": "karekromtablalı",
+      "image": "/products/bar/bar-karekromtablal.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "bar-karekromtablal-renkli-deri",
+      "name": "karekromtablalırenkli deri",
+      "image": "/products/bar/bar-karekromtablal-renkli-deri.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "bar-k-rm-z-govdelikumastabure",
+      "name": "kırmızıgövdelikumaştabure",
+      "image": "/products/bar/bar-k-rm-z-govdelikumastabure.jpg",
+      "quoteOnly": false
+    }
+  ],
+  "konferansSandalyeleri": [
+    {
+      "id": "ks-form-kollu-sandalye-f500",
+      "name": "form kollu sandalye f500",
+      "image": "/products/konferans-sandalyeleri/ks-form-kollu-sandalye-f500.webp",
+      "quoteOnly": false
+    },
+    {
+      "id": "ks-h-lton-sandalye",
+      "name": "hılton sandalye",
+      "image": "/products/konferans-sandalyeleri/ks-h-lton-sandalye.jpg",
+      "quoteOnly": false
+    }
+  ],
+  "konferansKoltuklari": [
+    {
+      "id": "kk-dolphinahsapkapal-kol-dolphin",
+      "name": "Dolphin — DolphinAhsapkapalıkol",
+      "image": "/products/konferans-koltuklari/kk-dolphinahsapkapal-kol-dolphin.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-dolphinkapal-kol-1-dolphin",
+      "name": "Dolphin — Dolphinkapalıkol (1)",
+      "image": "/products/konferans-koltuklari/kk-dolphinkapal-kol-1-dolphin.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-dolphinkapal-kol-2-dolphin",
+      "name": "Dolphin — Dolphinkapalıkol (2)",
+      "image": "/products/konferans-koltuklari/kk-dolphinkapal-kol-2-dolphin.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-dolphinkapal-kol-3-dolphin",
+      "name": "Dolphin — Dolphinkapalıkol (3)",
+      "image": "/products/konferans-koltuklari/kk-dolphinkapal-kol-3-dolphin.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-dolphinkapal-kol-4-dolphin",
+      "name": "Dolphin — Dolphinkapalıkol (4)",
+      "image": "/products/konferans-koltuklari/kk-dolphinkapal-kol-4-dolphin.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-dolphinkapal-kol-5-dolphin",
+      "name": "Dolphin — Dolphinkapalıkol (5)",
+      "image": "/products/konferans-koltuklari/kk-dolphinkapal-kol-5-dolphin.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-dolphinkapal-kol-6-dolphin",
+      "name": "Dolphin — Dolphinkapalıkol (6)",
+      "image": "/products/konferans-koltuklari/kk-dolphinkapal-kol-6-dolphin.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-dolphinkapal-kol-7-dolphin",
+      "name": "Dolphin — Dolphinkapalıkol (7)",
+      "image": "/products/konferans-koltuklari/kk-dolphinkapal-kol-7-dolphin.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-dolphinkapal-kol-8-dolphin",
+      "name": "Dolphin — Dolphinkapalıkol (8)",
+      "image": "/products/konferans-koltuklari/kk-dolphinkapal-kol-8-dolphin.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-dolphinkapal-kol-9-dolphin",
+      "name": "Dolphin — Dolphinkapalıkol (9)",
+      "image": "/products/konferans-koltuklari/kk-dolphinkapal-kol-9-dolphin.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romkapal-kol-ahsap-kolcak-2-rom",
+      "name": "Rom — RomKapalıKol ahşap kolçak (2)",
+      "image": "/products/konferans-koltuklari/kk-romkapal-kol-ahsap-kolcak-2-rom.png",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romkapal-kol-ahsap-kolcak-3-rom",
+      "name": "Rom — RomKapalıKol ahşap kolçak (3",
+      "image": "/products/konferans-koltuklari/kk-romkapal-kol-ahsap-kolcak-3-rom.png",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romkapal-kol-ahsap-kolcak1-rom",
+      "name": "Rom — RomKapalıKol ahşap kolçak1",
+      "image": "/products/konferans-koltuklari/kk-romkapal-kol-ahsap-kolcak1-rom.png",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romac-kkol-rom",
+      "name": "Rom — Romaçıkkol",
+      "image": "/products/konferans-koltuklari/kk-romac-kkol-rom.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romac-kkol1-rom",
+      "name": "Rom — Romaçıkkol1",
+      "image": "/products/konferans-koltuklari/kk-romac-kkol1-rom.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romac-kkol2-rom",
+      "name": "Rom — Romaçıkkol2",
+      "image": "/products/konferans-koltuklari/kk-romac-kkol2-rom.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romac-kkol3-rom",
+      "name": "Rom — Romaçıkkol3",
+      "image": "/products/konferans-koltuklari/kk-romac-kkol3-rom.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romac-kkolbardakl-3-rom",
+      "name": "Rom — Romaçıkkolbardaklı (3)",
+      "image": "/products/konferans-koltuklari/kk-romac-kkolbardakl-3-rom.png",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romac-kkolbardakl-1-rom",
+      "name": "Rom — Romaçıkkolbardaklı(1)",
+      "image": "/products/konferans-koltuklari/kk-romac-kkolbardakl-1-rom.png",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romac-kkolbardakl-2-rom",
+      "name": "Rom — Romaçıkkolbardaklı(2)",
+      "image": "/products/konferans-koltuklari/kk-romac-kkolbardakl-2-rom.png",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romac-kkolyaz-tablal-2-rom",
+      "name": "Rom — Romaçıkkolyazıtablalı (2)",
+      "image": "/products/konferans-koltuklari/kk-romac-kkolyaz-tablal-2-rom.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romac-kkolyaz-tablal-3-rom",
+      "name": "Rom — Romaçıkkolyazıtablalı (3)",
+      "image": "/products/konferans-koltuklari/kk-romac-kkolyaz-tablal-3-rom.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romac-kkolyaz-tablal-1-rom",
+      "name": "Rom — Romaçıkkolyazıtablalı(1)",
+      "image": "/products/konferans-koltuklari/kk-romac-kkolyaz-tablal-1-rom.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romkapal-kolgizliyaz-tablas-rom",
+      "name": "Rom — Romkapalıkolgizliyazıtablası",
+      "image": "/products/konferans-koltuklari/kk-romkapal-kolgizliyaz-tablas-rom.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romkapal-kolgizliyaz-tablas-2-rom",
+      "name": "Rom — Romkapalıkolgizliyazıtablası2",
+      "image": "/products/konferans-koltuklari/kk-romkapal-kolgizliyaz-tablas-2-rom.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romkapal-kolplastikkolcak1-rom",
+      "name": "Rom — Romkapalıkolplastikkolçak1",
+      "image": "/products/konferans-koltuklari/kk-romkapal-kolplastikkolcak1-rom.png",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romkapal-kolplastikkolcak2-rom",
+      "name": "Rom — Romkapalıkolplastikkolçak2",
+      "image": "/products/konferans-koltuklari/kk-romkapal-kolplastikkolcak2-rom.png",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-romkapal-kolplastikkolcak3-rom",
+      "name": "Rom — Romkapalıkolplastikkolçak3",
+      "image": "/products/konferans-koltuklari/kk-romkapal-kolplastikkolcak3-rom.png",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martin-acik-kol-konferans-koltugu-martin",
+      "name": "martin — martin acik kol konferans koltugu",
+      "image": "/products/konferans-koltuklari/kk-martin-acik-kol-konferans-koltugu-martin.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martin-acik-kol-konferans-koltugu2-martin",
+      "name": "martin — martin acik kol konferans koltugu2",
+      "image": "/products/konferans-koltuklari/kk-martin-acik-kol-konferans-koltugu2-martin.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martin-acik-kol-yazi-tablali-martin",
+      "name": "martin — martin acik kol yazi tablali",
+      "image": "/products/konferans-koltuklari/kk-martin-acik-kol-yazi-tablali-martin.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martin-ahsap-konferans-koltugu-martin",
+      "name": "martin — martin ahsap konferans koltugu",
+      "image": "/products/konferans-koltuklari/kk-martin-ahsap-konferans-koltugu-martin.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martin-ahsap-konferans-koltugu2-martin",
+      "name": "martin — martin ahsap konferans koltugu2",
+      "image": "/products/konferans-koltuklari/kk-martin-ahsap-konferans-koltugu2-martin.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martin-bardakli-martin",
+      "name": "martin — martin bardakli",
+      "image": "/products/konferans-koltuklari/kk-martin-bardakli-martin.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martin-bardakli2-martin",
+      "name": "martin — martin bardakli2",
+      "image": "/products/konferans-koltuklari/kk-martin-bardakli2-martin.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martin-icten-konferans-koltugu-kolustu-ahsap-martin",
+      "name": "martin — martin icten konferans koltugu kolustu ahsap",
+      "image": "/products/konferans-koltuklari/kk-martin-icten-konferans-koltugu-kolustu-ahsap-martin.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martin-icten-konferans-koltugu-kolustu-ahsap2-martin",
+      "name": "martin — martin icten konferans koltugu kolustu ahsap2",
+      "image": "/products/konferans-koltuklari/kk-martin-icten-konferans-koltugu-kolustu-ahsap2-martin.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martin-kapali-kol-konferans-koltugu-martin",
+      "name": "martin — martin kapali kol konferans koltugu",
+      "image": "/products/konferans-koltuklari/kk-martin-kapali-kol-konferans-koltugu-martin.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martin-kapali-kol-konferans-koltugu2-martin",
+      "name": "martin — martin kapali kol konferans koltugu2",
+      "image": "/products/konferans-koltuklari/kk-martin-kapali-kol-konferans-koltugu2-martin.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martin-yazi-tablali-kapali-kol-martin",
+      "name": "martin — martin yazi tablali kapali kol",
+      "image": "/products/konferans-koltuklari/kk-martin-yazi-tablali-kapali-kol-martin.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martinac-kkol-martin",
+      "name": "martin — martinaçıkkol",
+      "image": "/products/konferans-koltuklari/kk-martinac-kkol-martin.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martinkapal-kolplastikkolcak-martin",
+      "name": "martin — martinkapalıkolplastikkolçak",
+      "image": "/products/konferans-koltuklari/kk-martinkapal-kolplastikkolcak-martin.jpg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martinkapal-kolplastikkolcak2-martin",
+      "name": "martin — martinkapalıkolplastikkolçak2",
+      "image": "/products/konferans-koltuklari/kk-martinkapal-kolplastikkolcak2-martin.jpeg",
+      "quoteOnly": false
+    },
+    {
+      "id": "kk-martinkapal-kolplastikkolcak3-martin",
+      "name": "martin — martinkapalıkolplastikkolçak3",
+      "image": "/products/konferans-koltuklari/kk-martinkapal-kolplastikkolcak3-martin.jpeg",
+      "quoteOnly": false
+    }
+  ],
+  "stadyum": [
+    {
+      "id": "st-103ebfbc2f4f76753a884aa6eb1ee9aa-togan-serisi",
+      "name": "TOGAN SERİSİ — 103ebfbc2f4f76753a884aa6eb1ee9aa",
+      "image": "/products/stadyum/st-103ebfbc2f4f76753a884aa6eb1ee9aa-togan-serisi.png",
+      "quoteOnly": true
+    },
+    {
+      "id": "st-15ac8c7393d22f53a0b154d71abd765c-togan-serisi",
+      "name": "TOGAN SERİSİ — 15ac8c7393d22f53a0b154d71abd765c",
+      "image": "/products/stadyum/st-15ac8c7393d22f53a0b154d71abd765c-togan-serisi.png",
+      "quoteOnly": true
+    },
+    {
+      "id": "st-togan101-standart-togan-serisi",
+      "name": "TOGAN SERİSİ — TOGAN101 Standart",
+      "image": "/products/stadyum/st-togan101-standart-togan-serisi.png",
+      "quoteOnly": true
+    },
+    {
+      "id": "st-thoryedekoyuncukoltugu-1-yedek-kulubesi-oyuncu-koltugu",
+      "name": "Yedek kulübesi oyuncu koltugu — ThorYedekoyuncukoltugu (1)",
+      "image": "/products/stadyum/st-thoryedekoyuncukoltugu-1-yedek-kulubesi-oyuncu-koltugu.jpeg",
+      "quoteOnly": true
+    },
+    {
+      "id": "st-thoryedekoyuncukoltugu-2-yedek-kulubesi-oyuncu-koltugu",
+      "name": "Yedek kulübesi oyuncu koltugu — ThorYedekoyuncukoltugu (2)",
+      "image": "/products/stadyum/st-thoryedekoyuncukoltugu-2-yedek-kulubesi-oyuncu-koltugu.jpeg",
+      "quoteOnly": true
+    },
+    {
+      "id": "st-thoryedekoyuncukoltugu-3-yedek-kulubesi-oyuncu-koltugu",
+      "name": "Yedek kulübesi oyuncu koltugu — ThorYedekoyuncukoltugu (3)",
+      "image": "/products/stadyum/st-thoryedekoyuncukoltugu-3-yedek-kulubesi-oyuncu-koltugu.jpeg",
+      "quoteOnly": true
+    },
+    {
+      "id": "st-whatsapp-image-2026-05-16-at-18-39-36-yedek-kulubesi-oyuncu-koltugu",
+      "name": "Yedek kulübesi oyuncu koltugu — WhatsApp Image 2026 05 16 at 18.39.36",
+      "image": "/products/stadyum/st-whatsapp-image-2026-05-16-at-18-39-36-yedek-kulubesi-oyuncu-koltugu.jpeg",
+      "quoteOnly": true
+    },
+    {
+      "id": "st-08-7b197347-b8b701f3f2bd-omega-serisi",
+      "name": "omega serisi — 08 7b197347 b8b701f3f2bd",
+      "image": "/products/stadyum/st-08-7b197347-b8b701f3f2bd-omega-serisi.webp",
+      "quoteOnly": true
+    },
+    {
+      "id": "st-09-427b4cb1-5df676b6489b-omega-serisi",
+      "name": "omega serisi — 09 427b4cb1 5df676b6489b",
+      "image": "/products/stadyum/st-09-427b4cb1-5df676b6489b-omega-serisi.webp",
+      "quoteOnly": true
+    },
+    {
+      "id": "st-10-73734c01-627fd07bb6a9-omega-serisi",
+      "name": "omega serisi — 10 73734c01 627fd07bb6a9",
+      "image": "/products/stadyum/st-10-73734c01-627fd07bb6a9-omega-serisi.webp",
+      "quoteOnly": true
+    },
+    {
+      "id": "st-09-bcda9c92-419b7c674db4-1-omega-serisi",
+      "name": "omega serisi — 09 bcda9c92 419b7c674db4 (1)",
+      "image": "/products/stadyum/st-09-bcda9c92-419b7c674db4-1-omega-serisi.webp",
+      "quoteOnly": true
+    },
+    {
+      "id": "st-09-bcda9c92-419b7c674db4-omega-serisi",
+      "name": "omega serisi — 09 bcda9c92 419b7c674db4",
+      "image": "/products/stadyum/st-09-bcda9c92-419b7c674db4-omega-serisi.webp",
+      "quoteOnly": true
+    }
+  ]
+}

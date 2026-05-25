@@ -3,37 +3,34 @@
 import Image from "next/image";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
-import { SITE_NAME } from "@/lib/site-data";
 
-/** Yalnızca ofis ortamı / yaşam tarzı görselleri — ürün kesiti yok */
 const slides = [
   {
-    id: "h1",
-    src: "/hero/slide-01.jpg",
-    alt: "Aydınlık modern ofis çalışma alanı ve toplantı köşesi",
-    line1: "Ofise hoş geldiniz",
-    line2: "Modern çalışma alanlarında konfor ve ergonomi",
+    id: "1",
+    src: "/hero/slide-1.png",
+    alt: "Koltuk Dünyası slayt 1",
+    accent: "Konferans & salon",
+    headline: "koltukları",
+    headlineBold: "KEŞFEDİN",
+    sub: "Konferans sandalyeleri ve salon koltuk serileri",
   },
   {
-    id: "h2",
-    src: "/hero/slide-02.jpg",
-    alt: "Geniş pencereli, bitkilerle zenginleştirilmiş ofis ortamı",
-    line1: "İlham veren mekânlar",
-    line2: "Doğal ışık ve ferah düzenler",
+    id: "2",
+    src: "/hero/slide-2.png",
+    alt: "Koltuk Dünyası slayt 2",
+    accent: "Tabure & stadyum",
+    headline: "çözümleri",
+    headlineBold: "İNCELEYİN",
+    sub: "Bar tabureleri ve stadyum koltuk sistemleri",
   },
   {
-    id: "h3",
-    src: "/hero/slide-03.jpg",
-    alt: "Minimal çağdaş ofis iç mekânı",
-    line1: "Verimli çalışma",
-    line2: "Ekip çalışmasına uygun profesyonel ortamlar",
-  },
-  {
-    id: "h4",
-    src: "/hero/slide-04.jpg",
-    alt: "Yeşillik ve ahşap detaylarla modern ofis",
-    line1: "Kurumsal kimliğinize uygun",
-    line2: "Şık detaylar ve sürdürülebilir ofis kültürü",
+    id: "3",
+    src: "/hero/slide-3.png",
+    alt: "Koltuk Dünyası slayt 3",
+    accent: "Projeler",
+    headline: "kurulumlarınız için",
+    headlineBold: "TEKLİF ALIN",
+    sub: "Referans projeler ve özel üretim",
   },
 ] as const;
 
@@ -57,17 +54,17 @@ export function HeroSlider() {
 
   useEffect(() => {
     if (!emblaApi) return;
-    const id = window.setInterval(() => emblaApi.scrollNext(), 5200);
+    const id = window.setInterval(() => emblaApi.scrollNext(), 6000);
     return () => window.clearInterval(id);
   }, [emblaApi]);
 
   return (
-    <section className="relative">
+    <section className="relative bg-zinc-900">
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex">
           {slides.map((s, i) => (
             <div key={s.id} className="relative min-w-0 flex-[0_0_100%]">
-              <div className="relative aspect-[21/9] min-h-[280px] w-full bg-zinc-900 sm:min-h-[360px] lg:aspect-[24/9]">
+              <div className="relative aspect-[16/9] min-h-[300px] w-full sm:min-h-[420px] lg:aspect-[21/9]">
                 <Image
                   src={s.src}
                   alt={s.alt}
@@ -76,28 +73,47 @@ export function HeroSlider() {
                   className="object-cover object-center"
                   sizes="100vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-black/10" />
-                <div className="absolute inset-0 flex flex-col justify-end px-6 pb-16 pt-10 sm:px-10 lg:px-16 lg:pb-20">
-                  <p className="font-serif text-3xl text-white drop-shadow-md sm:text-4xl lg:text-5xl">{s.line1}</p>
-                  <p className="mt-2 max-w-xl text-sm font-medium uppercase tracking-[0.2em] text-white/95 sm:text-base">
-                    {s.line2}
+                <div className="absolute inset-0 bg-gradient-to-l from-black/50 via-black/20 to-transparent" />
+                <div className="absolute inset-y-0 right-0 flex w-full max-w-lg flex-col justify-center px-6 text-right sm:px-12 lg:px-16">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/90">{s.accent}</p>
+                  <p className="mt-2 font-serif text-3xl italic text-white sm:text-4xl lg:text-5xl">{s.headline}</p>
+                  <p className="mt-1 text-2xl font-bold uppercase tracking-wide text-white sm:text-3xl lg:text-4xl">
+                    {s.headlineBold}
                   </p>
-                  <p className="mt-4 hidden font-serif text-lg text-white/85 sm:block">{SITE_NAME}</p>
+                  <p className="mt-4 text-sm text-white/85">{s.sub}</p>
                 </div>
               </div>
             </div>
           ))}
         </div>
       </div>
-      <div className="pointer-events-none absolute bottom-4 left-0 right-0 flex justify-center gap-2 sm:bottom-6">
+
+      <button
+        type="button"
+        onClick={() => emblaApi?.scrollPrev()}
+        className="absolute left-3 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-white/20 text-white backdrop-blur-sm transition hover:bg-white/30 md:flex"
+        aria-label="Önceki slayt"
+      >
+        ‹
+      </button>
+      <button
+        type="button"
+        onClick={() => emblaApi?.scrollNext()}
+        className="absolute right-3 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 bg-white/20 text-white backdrop-blur-sm transition hover:bg-white/30 md:flex"
+        aria-label="Sonraki slayt"
+      >
+        ›
+      </button>
+
+      <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
         {slides.map((s, i) => (
           <button
             key={s.id}
             type="button"
             aria-label={`Slayt ${i + 1}`}
             onClick={() => emblaApi?.scrollTo(i)}
-            className={`pointer-events-auto h-2 rounded-full transition-all duration-300 ${
-              i === selected ? "w-8 bg-white shadow-sm" : "w-2 bg-white/45 ring-1 ring-white/70 hover:bg-white/75"
+            className={`h-2 rounded-full transition-all ${
+              i === selected ? "w-8 bg-white" : "w-2 bg-white/50"
             }`}
           />
         ))}

@@ -40,11 +40,19 @@ function IconBag(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+function IconPhone(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" {...props}>
+      <path d="M6.5 4h3l1.5 4-2 1.5a12 12 0 0 0 5 5L15 13l4 1.5v3a1 1 0 0 1-1.1 1A17 17 0 0 1 5.5 5.1 1 1 0 0 1 6.5 4Z" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 const items = [
   { href: "/#kategoriler", label: "Kategoriler", Icon: IconList },
-  { href: "/#favoriler", label: "Favorilerim", Icon: IconHeart },
-  { href: "/#hesap", label: "Hesabım", Icon: IconUser },
-  { href: "/#sepet", label: "Sepetim", Icon: IconBag },
+  { href: "/konferans-koltuklari", label: "Ürünler", Icon: IconBag },
+  { href: "/stadyum", label: "Stadyum", Icon: IconHeart },
+  { href: "/iletisim", label: "İletişim", Icon: IconPhone },
 ] as const;
 
 export function MobileDock() {

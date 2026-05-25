@@ -1,18 +1,20 @@
 import type { CatalogProduct } from "@/lib/products";
 import {
-  dealProducts,
-  featuredRound,
-  gamingListing,
-  newArrivals,
-  officeListing,
+  barListing,
+  homeFeatured,
+  konferansKoltuklariListing,
+  konferansListing,
+  konferansSandalyeleriListing,
+  stadyumListing,
 } from "@/lib/products";
 
 const allLists: CatalogProduct[][] = [
-  featuredRound,
-  dealProducts,
-  newArrivals,
-  officeListing,
-  gamingListing,
+  barListing,
+  konferansSandalyeleriListing,
+  konferansKoltuklariListing,
+  konferansListing,
+  stadyumListing,
+  homeFeatured,
 ];
 
 function buildProductMap(): Map<string, CatalogProduct> {

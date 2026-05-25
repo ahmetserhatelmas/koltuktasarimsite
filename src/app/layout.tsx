@@ -18,10 +18,11 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: `${SITE_NAME} | Ofis ve gaming koltukları`,
+    default: `${SITE_NAME} | Konferans, bar ve stadyum koltukları`,
     template: `%s | ${SITE_NAME}`,
   },
-  description: "Koltuk Dünyası — şık ve akışkan demo vitrin. Ofis sandalyeleri ve gaming koltukları.",
+  description:
+    "Koltuk Dünyası — konferans sandalyeleri, konferans koltukları, bar tabureleri ve stadyum koltuk sistemleri.",
 };
 
 export default function RootLayout({

@@ -32,13 +32,11 @@ const footerCols = [
   {
     title: "Kategoriler",
     links: [
-      ["Ofis Sandalyeleri", "/ofis-sandalyeleri"],
-      ["Akustik Paneller", "/#akustik"],
-      ["Gaming Koltukları", "/gaming-koltuklari"],
-      ["Sandalye & Bar Tabure", "/#bar"],
-      ["Konferans Koltukları", "/#konferans"],
-      ["Fırsat Ürünleri", "/#firsat"],
-      ["Yeni Ürünler", "/#yeni-gelenler"],
+      ["Konferans Sandalyeleri", "/konferans-sandalyeleri"],
+      ["Konferans Koltukları", "/konferans-koltuklari"],
+      ["Bar Taburesi", "/bar-taburesi"],
+      ["Stadyum", "/stadyum"],
+      ["Projeler", "/#projeler"],
     ],
   },
   {
@@ -48,7 +46,6 @@ const footerCols = [
       ["Project & Export", "/#export"],
       ["Referanslar", "/#referans"],
       ["Sıkça Sorulanlar", "/#sss"],
-      ["Blog", "/#blog"],
       ["Hesap Numaraları", "/#hesap"],
       ["Bize Ulaşın", "/iletisim"],
     ],
@@ -94,21 +91,7 @@ export function SiteFooter() {
     <footer className="mt-auto border-t border-zinc-200 bg-zinc-50">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
-          <div className="max-w-md">
-            <p className="text-sm font-semibold text-zinc-900">Bizi Takip Edin</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {["Instagram", "Facebook", "X", "LinkedIn", "YouTube"].map((s) => (
-                <a
-                  key={s}
-                  href="#"
-                  className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-zinc-300 hover:shadow-sm"
-                >
-                  {s}
-                </a>
-              ))}
-            </div>
-          </div>
-          <div className="max-w-md lg:text-right">
+          <div className="max-w-md lg:text-right lg:ml-auto">
             <p className="text-sm font-semibold text-zinc-900">E-Bültene Kaydol</p>
             <NewsletterForm />
           </div>
@@ -145,13 +128,6 @@ export function SiteFooter() {
                 <div>
                   <p className="text-sm font-semibold text-zinc-900">WhatsApp Destek</p>
                   {contactLine("WhatsApp", CONTACT.whatsapp)}
-                </div>
-              </div>
-              <div className="flex gap-3 rounded-2xl border border-zinc-200 bg-white p-4">
-                <IconPackage className="mt-0.5 h-6 w-6 shrink-0 text-zinc-700" />
-                <div>
-                  <p className="text-sm font-semibold text-zinc-900">Sipariş Takibi</p>
-                  <p className="text-sm text-zinc-600">Kargonuzu takip edin (demo)</p>
                 </div>
               </div>
               <div className="rounded-2xl border border-zinc-200 bg-white p-4">

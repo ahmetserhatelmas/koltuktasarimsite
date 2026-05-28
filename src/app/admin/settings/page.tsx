@@ -16,11 +16,6 @@ export default function AdminSettingsPage() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState("")
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void load()
-  }, [])
-
   async function load() {
     const supabase = createClient()
     const { data } = await supabase
@@ -30,6 +25,11 @@ export default function AdminSettingsPage() {
     setSettings(data ?? [])
     setLoading(false)
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load()
+  }, [])
 
   function updateValue(key: string, value: string) {
     setSettings((prev) =>

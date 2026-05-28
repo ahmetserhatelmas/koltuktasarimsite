@@ -158,7 +158,7 @@ export default async function ContactPage() {
           ) : (
             <div className="aspect-[21/9] min-h-[200px] w-full bg-zinc-50 flex items-center justify-center">
               <p className="text-sm text-zinc-400">
-                Harita henüz eklenmedi — Admin Paneli → Ayarlar'dan ekleyebilirsiniz.
+                Harita henüz eklenmedi — Admin Paneli → Ayarlar&apos;dan ekleyebilirsiniz.
               </p>
             </div>
           )}

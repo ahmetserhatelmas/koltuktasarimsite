@@ -32,16 +32,6 @@ const footerCols = [
   },
 ] as const;
 
-function contactLine(label: string, value: string) {
-  const display = value.trim() || "—";
-  return (
-    <p className="text-sm text-zinc-600">
-      <span className="font-medium text-zinc-900">{label}: </span>
-      {display}
-    </p>
-  );
-}
-
 export async function SiteFooter() {
   // Supabase'den güncel iletişim bilgilerini ve harita URL'sini çek
   let phone: string = CONTACT.phone;

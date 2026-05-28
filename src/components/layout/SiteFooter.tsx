@@ -44,10 +44,10 @@ function contactLine(label: string, value: string) {
 
 export async function SiteFooter() {
   // Supabase'den güncel iletişim bilgilerini ve harita URL'sini çek
-  let phone = CONTACT.phone;
-  let whatsapp = CONTACT.whatsapp;
-  let email = CONTACT.email;
-  let address = CONTACT.address;
+  let phone: string = CONTACT.phone;
+  let whatsapp: string = CONTACT.whatsapp;
+  let email: string = CONTACT.email;
+  let address: string = CONTACT.address;
   let mapEmbedUrl = "";
 
   try {

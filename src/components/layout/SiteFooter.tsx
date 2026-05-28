@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { NewsletterForm } from "@/components/forms/NewsletterForm";
 import { CONTACT, SITE_NAME } from "@/lib/site-data";
+import { createClient } from "@/lib/supabase/server";
 
 function IconHeadset(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -30,25 +30,6 @@ const footerCols = [
       ["Projeler", "/#projeler"],
     ],
   },
-  {
-    title: "Kurumsal",
-    links: [
-      ["Hakkımızda", "/#kurumsal"],
-      ["Project & Export", "/#export"],
-      ["Referanslar", "/#referans"],
-      ["Sıkça Sorulanlar", "/#sss"],
-      ["Bize Ulaşın", "/iletisim"],
-    ],
-  },
-  {
-    title: "Yasal Bilgilendirme",
-    links: [
-      ["K.V.K.K. Bilgilendirmesi", "/#kvkk"],
-      ["Gizlilik Sözleşmesi", "/#gizlilik"],
-      ["Çerez Kullanımı", "/#cerez"],
-      ["Çevre Politikası", "/#cevre"],
-    ],
-  },
 ] as const;
 
 function contactLine(label: string, value: string) {
@@ -61,18 +42,37 @@ function contactLine(label: string, value: string) {
   );
 }
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  // Supabase'den güncel iletişim bilgilerini ve harita URL'sini çek
+  let phone = CONTACT.phone;
+  let whatsapp = CONTACT.whatsapp;
+  let email = CONTACT.email;
+  let address = CONTACT.address;
+  let mapEmbedUrl = "";
+
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.from("settings").select("key, value");
+    if (data) {
+      const map = Object.fromEntries(data.map((s: { key: string; value: string }) => [s.key, s.value]));
+      phone = map.contact_phone || phone;
+      whatsapp = map.contact_whatsapp || whatsapp;
+      email = map.contact_email || email;
+      address = map.contact_address || address;
+      mapEmbedUrl = map.map_embed_url || "";
+    }
+  } catch {
+    // Supabase bağlantısı yoksa statik değerlere fallback
+  }
+
+  const isValidMap = mapEmbedUrl && (mapEmbedUrl.includes("/maps/embed") || mapEmbedUrl.includes("output=embed"))
+
   return (
     <footer className="mt-auto border-t border-zinc-200 bg-zinc-50">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
-          <div className="max-w-md lg:text-right lg:ml-auto">
-            <p className="text-sm font-semibold text-zinc-900">E-Bültene Kaydol</p>
-            <NewsletterForm />
-          </div>
-        </div>
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
 
-        <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
+          {/* Kategoriler */}
           {footerCols.map((col) => (
             <div key={col.title} className="lg:col-span-1">
               <p className="text-sm font-semibold text-zinc-900">{col.title}</p>
@@ -88,29 +88,53 @@ export function SiteFooter() {
             </div>
           ))}
 
+          {/* Harita */}
+          <div className="lg:col-span-2">
+            <p className="mb-3 text-sm font-semibold text-zinc-900">Konum</p>
+            {isValidMap ? (
+              <div className="overflow-hidden rounded border border-zinc-200">
+                <iframe
+                  src={mapEmbedUrl}
+                  className="h-56 w-full"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+            ) : (
+              <div className="flex h-56 items-center justify-center rounded border border-dashed border-zinc-200 text-xs text-zinc-400">
+                Harita eklenmemiş
+              </div>
+            )}
+            {address.trim() && (
+              <p className="mt-2 text-xs text-zinc-500">{address}</p>
+            )}
+          </div>
+
+          {/* İletişim */}
           <div className="sm:col-span-2 lg:col-span-2">
             <p className="text-sm font-semibold text-zinc-900">İletişim</p>
-            <div className="mt-4 space-y-4">
-              <div className="flex gap-3 rounded-2xl border border-zinc-200 bg-white p-4">
-                <IconHeadset className="mt-0.5 h-6 w-6 shrink-0 text-zinc-700" />
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center gap-2.5 rounded-xl border border-zinc-200 bg-white px-3 py-2.5">
+                <IconHeadset className="h-5 w-5 shrink-0 text-zinc-600" />
                 <div>
-                  <p className="text-sm font-semibold text-zinc-900">Müşteri Hattı</p>
-                  {contactLine("Telefon", CONTACT.phone)}
+                  <p className="text-xs font-semibold text-zinc-900">Müşteri Hattı</p>
+                  <p className="text-xs text-zinc-600">{phone.trim() || "—"}</p>
                 </div>
               </div>
-              <div className="flex gap-3 rounded-2xl border border-zinc-200 bg-white p-4">
-                <IconWA className="mt-0.5 h-6 w-6 shrink-0 text-emerald-600" />
+              <div className="flex items-center gap-2.5 rounded-xl border border-zinc-200 bg-white px-3 py-2.5">
+                <IconWA className="h-5 w-5 shrink-0 text-emerald-600" />
                 <div>
-                  <p className="text-sm font-semibold text-zinc-900">WhatsApp Destek</p>
-                  {contactLine("WhatsApp", CONTACT.whatsapp)}
+                  <p className="text-xs font-semibold text-zinc-900">WhatsApp</p>
+                  <p className="text-xs text-zinc-600">{whatsapp.trim() || "—"}</p>
                 </div>
               </div>
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4">
-                <p className="text-sm font-semibold text-zinc-900">E-posta</p>
-                {contactLine("E-posta", CONTACT.email)}
-                <p className="mt-3 text-sm font-semibold text-zinc-900">Adres</p>
-                <p className="mt-1 text-sm text-zinc-600">{CONTACT.address.trim() || "—"}</p>
-              </div>
+              {email.trim() && (
+                <div className="rounded-xl border border-zinc-200 bg-white px-3 py-2.5">
+                  <p className="text-xs font-semibold text-zinc-900">E-posta</p>
+                  <p className="text-xs text-zinc-600">{email}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

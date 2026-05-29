@@ -16,13 +16,6 @@ const LOCALES = [
   { code: "ar", label: "العربية" },
 ] as const
 
-async function translateText(text: string, targetLang: string): Promise<string> {
-  if (!text.trim()) return ""
-  const res = await fetch(`/api/translate?text=${encodeURIComponent(text)}&target=${targetLang}`)
-  const json = await res.json() as { translated?: string }
-  return json.translated ?? text
-}
-
 export function PageForm({ page }: Props) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
@@ -81,7 +74,31 @@ export function PageForm({ page }: Props) {
     try {
       const supabase = createClient()
 
-      // Önce mevcut translations'ı al
+      setTransStatus("Çevriliyor...")
+
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: title.trim(),
+          description_intro: content.trim(),
+          description_footer: "",
+          description_bullets: [],
+          description_specs: [],
+        }),
+      })
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null) as { error?: string } | null
+        setTransStatus(`Hata: ${errBody?.error ?? "Çeviri isteği başarısız."}`)
+        setTranslating(false)
+        return
+      }
+
+      const data = await res.json() as {
+        translations?: Record<string, { name?: string; description_intro?: string }>
+      }
+
       const { data: existing } = await supabase
         .from("content_pages")
         .select("translations")
@@ -90,16 +107,10 @@ export function PageForm({ page }: Props) {
       const currentTrans = (existing?.translations as Record<string, unknown>) ?? {}
 
       for (const loc of LOCALES) {
-        setTransStatus(`${loc.label} çevriliyor...`)
-
-        const [transTitle, transContent] = await Promise.all([
-          title.trim() ? translateText(title, loc.code) : Promise.resolve(""),
-          content.trim() ? translateText(content, loc.code) : Promise.resolve(""),
-        ])
-
+        const tr = data.translations?.[loc.code]
         currentTrans[loc.code] = {
-          title: transTitle || title,
-          content: transContent || content,
+          title: tr?.name || title,
+          content: tr?.description_intro || content,
         }
       }
 

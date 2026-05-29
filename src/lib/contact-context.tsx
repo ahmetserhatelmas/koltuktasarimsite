@@ -3,7 +3,7 @@
 import { createContext, useContext } from "react"
 import { CONTACT } from "@/lib/site-data"
 
-const ContactContext = createContext({ whatsapp: CONTACT.whatsapp })
+const ContactContext = createContext<{ whatsapp: string }>({ whatsapp: CONTACT.whatsapp })
 
 export function ContactProvider({
   whatsapp,

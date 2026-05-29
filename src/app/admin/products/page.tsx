@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import type { Product, ProductCategory } from "@/lib/supabase/types"
+import type { Product } from "@/lib/supabase/types"
 import { CATEGORY_LABELS } from "@/lib/supabase/types"
 
 type CategoryTab = { value: string; label: string }
@@ -12,7 +12,7 @@ type CategoryTab = { value: string; label: string }
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<ProductCategory | "all">("all")
+  const [filter, setFilter] = useState<string>("all")
   const [search, setSearch] = useState("")
   const [deleting, setDeleting] = useState<string | null>(null)
   const [categories, setCategories] = useState<CategoryTab[]>([{ value: "all", label: "Tümü" }])
@@ -182,7 +182,11 @@ export default function AdminProductsPage() {
                     <p className="text-xs text-zinc-400">{product.id}</p>
                   </td>
                   <td className="px-4 py-3 text-zinc-600">
-                    <p>{CATEGORY_LABELS[product.category]}</p>
+                    <p>
+                      {categories.find((c) => c.value === product.category)?.label
+                        ?? CATEGORY_LABELS[product.category as keyof typeof CATEGORY_LABELS]
+                        ?? product.category}
+                    </p>
                     {(() => {
                       const p = product as typeof product & { colors?: { name: string; hex: string }[] }
                       if (!p.colors?.length) return null

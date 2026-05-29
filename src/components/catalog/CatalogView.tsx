@@ -6,14 +6,22 @@ import { ProductCard } from "@/components/ui/ProductCard";
 import type { CatalogProduct } from "@/lib/products";
 import { useI18n } from "@/lib/i18n/context";
 
+type CategoryLink = { label: string; href: string };
+
 export function CatalogView({
   title,
   products,
+  categoryLinks,
 }: {
   title: string;
   products: CatalogProduct[];
+  categoryLinks?: CategoryLink[];
 }) {
   const { t } = useI18n();
+  const links =
+    categoryLinks && categoryLinks.length > 0
+      ? categoryLinks
+      : CATEGORIES.map((c) => ({ label: c.label, href: c.href }));
   const [filterOpen, setFilterOpen] = useState(false);
   const [min, setMin] = useState("");
   const [max, setMax] = useState("");
@@ -82,10 +90,10 @@ export function CatalogView({
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">{t.catalog.categories}</p>
             <ul className="mt-3 space-y-2">
-              {CATEGORIES.map((c) => (
-                <li key={c.slug}>
+              {links.map((c) => (
+                <li key={c.href}>
                   <a href={c.href} className="text-sm text-zinc-700 hover:text-zinc-950">
-                    {(t.category as Record<string, string>)[c.slug] || c.label}
+                    {c.label}
                   </a>
                 </li>
               ))}

@@ -39,18 +39,6 @@ export function SiteHeader({ navItems }: { navItems: NavItem[] }) {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
-  function navLabel(href: string, fallback: string): string {
-    const map: Record<string, string> = {
-      "/konferans-sandalyeleri": t.category["konferans-sandalyeleri"],
-      "/konferans-koltuklari":   t.category["konferans-koltuklari"],
-      "/bar-taburesi":           t.category.bar,
-      "/stadyum":                t.category.stadyum,
-      "/iletisim":               t.nav.contact,
-      "/#projeler":              t.nav.projects,
-    }
-    return map[href] ?? fallback
-  }
-
   useEffect(() => {
     queueMicrotask(() => setOpen(false));
   }, [pathname]);
@@ -100,7 +88,7 @@ export function SiteHeader({ navItems }: { navItems: NavItem[] }) {
                       href={item.href}
                       className={`py-1 transition hover:text-zinc-950 ${active ? "text-zinc-950 underline decoration-2 underline-offset-4" : ""}`}
                     >
-                      {navLabel(item.href, item.label)}
+                      {item.label}
                     </Link>
                   </li>
                 );
@@ -182,7 +170,7 @@ export function SiteHeader({ navItems }: { navItems: NavItem[] }) {
                     href={item.href}
                     className="block px-4 py-3.5 text-sm font-medium uppercase tracking-wide text-zinc-800 hover:bg-zinc-50"
                   >
-                    {navLabel(item.href, item.label)}
+                    {item.label}
                   </Link>
                 </li>
               ))}

@@ -3,6 +3,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import type { CatalogProduct } from "@/lib/products";
 import { getLocale } from "@/lib/i18n/server";
 import { getDict } from "@/lib/i18n/dict";
+import { getNavLinks } from "@/lib/nav-links";
 
 export async function CatalogPage({
   title,
@@ -15,6 +16,7 @@ export async function CatalogPage({
 }) {
   const locale = await getLocale();
   const t = getDict(locale);
+  const categoryLinks = await getNavLinks();
 
   return (
     <main className="flex-1 bg-[var(--surface)]">
@@ -31,7 +33,7 @@ export async function CatalogPage({
           />
         </div>
       </div>
-      <CatalogView title={title} products={products} />
+      <CatalogView title={title} products={products} categoryLinks={categoryLinks} />
     </main>
   );
 }

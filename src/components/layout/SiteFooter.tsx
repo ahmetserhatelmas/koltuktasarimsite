@@ -6,10 +6,11 @@ import { getLocale } from "@/lib/i18n/server";
 import { getDict } from "@/lib/i18n/dict";
 import { createClient } from "@/lib/supabase/server";
 import { SocialFollowBar } from "@/components/layout/SocialFollowBar";
+import { getNavLinks } from "@/lib/nav-links";
+import { CATEGORIES } from "@/lib/categories";
 import {
   contentPageHref,
   DEFAULT_CONTENT_PAGES,
-  type Category,
   type ContentPage,
 } from "@/lib/supabase/types";
 
@@ -30,12 +31,7 @@ function IconWA(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-const FALLBACK_CATEGORY_SLUGS = [
-  ["konferans-sandalyeleri", "/konferans-sandalyeleri"],
-  ["konferans-koltuklari", "/konferans-koltuklari"],
-  ["bar", "/bar-taburesi"],
-  ["stadyum", "/stadyum"],
-] as const;
+const FALLBACK_CATEGORY_LINKS = CATEGORIES.map((c) => ({ label: c.label, href: c.href }));
 
 export async function SiteFooter() {
   const locale = await getLocale()
@@ -54,7 +50,7 @@ export async function SiteFooter() {
 
   try {
     const supabase = await createClient();
-    const [{ data: settings }, { data: pages }, { data: categories }] = await Promise.all([
+    const [{ data: settings }, { data: pages }, navLinks] = await Promise.all([
       supabase.from("settings").select("key, value"),
       supabase
         .from("content_pages")
@@ -62,11 +58,7 @@ export async function SiteFooter() {
         .eq("is_active", true)
         .order("section")
         .order("sort_order"),
-      supabase
-        .from("categories")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order"),
+      getNavLinks(),
     ]);
 
     if (settings) {
@@ -84,19 +76,8 @@ export async function SiteFooter() {
       yasalPages = pages.filter((p) => p.section === "yasal");
     }
 
-    if (categories && categories.length > 0) {
-      categoryLinks = (categories as Category[]).map((cat) => {
-        const trans = locale !== "tr" ? (cat.translations as Partial<Record<string, { label?: string }>> | undefined)?.[locale] : undefined
-        const dictLabel = locale !== "tr" ? (t.category as Record<string, string>)[cat.slug] || (t.category as Record<string, string>)[cat.id] : undefined
-        return {
-          label: trans?.label || dictLabel || cat.label,
-          href: cat.route,
-        }
-      });
-      // "Projeler" henüz listede yoksa sona ekle
-      if (!categoryLinks.some((l) => l.href === "/#projeler")) {
-        categoryLinks.push({ label: t.nav.projects, href: "/#projeler" })
-      }
+    if (navLinks.length > 0) {
+      categoryLinks = navLinks;
     }
   } catch {
     // Supabase bağlantısı yoksa statik değerlere fallback
@@ -109,13 +90,7 @@ export async function SiteFooter() {
     yasalPages = DEFAULT_CONTENT_PAGES.filter((p) => p.section === "yasal");
   }
   if (categoryLinks.length === 0) {
-    categoryLinks = [
-      ...FALLBACK_CATEGORY_SLUGS.map(([slug, href]) => ({
-        label: (t.category as Record<string, string>)[slug] || slug,
-        href,
-      })),
-      { label: t.nav.projects, href: "/#projeler" },
-    ];
+    categoryLinks = FALLBACK_CATEGORY_LINKS;
   }
 
   const isValidMap = mapEmbedUrl && (mapEmbedUrl.includes("/maps/embed") || mapEmbedUrl.includes("output=embed"))

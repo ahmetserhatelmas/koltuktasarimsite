@@ -1,6 +1,15 @@
 export type ProductSpec = { label: string; value: string }
 export type ProductColor = { name: string; hex: string }
 
+export type NavItem = {
+  id: string
+  label: string
+  href: string
+  sort_order: number
+  is_active: boolean
+  created_at: string
+}
+
 export type ProductCategory =
   | "bar"
   | "konferans-sandalyeleri"

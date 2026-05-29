@@ -6,6 +6,8 @@ import { formatContentHtml } from "@/lib/content-format"
 import { createClient } from "@/lib/supabase/server"
 import { CONTENT_SECTION_LABELS, DEFAULT_CONTENT_PAGES, type ContentPage } from "@/lib/supabase/types"
 import { SITE_NAME } from "@/lib/site-data"
+import { getLocale } from "@/lib/i18n/server"
+import { getDict } from "@/lib/i18n/dict"
 
 export const dynamic = "force-dynamic"
 
@@ -40,7 +42,24 @@ export default async function ContentPageView({ params }: Props) {
 
   if (!page) notFound()
 
-  const html = formatContentHtml(page.content ?? "")
+  const locale = await getLocale()
+  const t = getDict(locale)
+
+  // Çeviri: DB'deki translations JSONB'den locale'e göre bak
+  type PageTrans = { title?: string; content?: string }
+  const trans = locale !== "tr"
+    ? ((page as ContentPage & { translations?: Record<string, PageTrans> }).translations?.[locale] as PageTrans | undefined)
+    : undefined
+
+  const displayTitle   = trans?.title   || page.title
+  const displayContent = trans?.content || (page.content ?? "")
+
+  const html = formatContentHtml(displayContent)
+
+  // Bölüm etiketini de çevir
+  const sectionLabel = page.section === "kurumsal"
+    ? (locale === "en" ? "Corporate" : locale === "ru" ? "О компании" : locale === "ar" ? "الشركة" : "Kurumsal")
+    : (locale === "en" ? "Legal" : locale === "ru" ? "Правовая информация" : locale === "ar" ? "قانوني" : "Yasal Bilgilendirme")
 
   return (
     <main className="flex-1 bg-[var(--surface)] pb-16 pt-4 sm:pb-20">
@@ -48,9 +67,9 @@ export default async function ContentPageView({ params }: Props) {
         <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6 lg:px-8">
           <Breadcrumbs
             items={[
-              { label: "Anasayfa", href: "/" },
-              { label: CONTENT_SECTION_LABELS[page.section] ?? "Sayfa" },
-              { label: page.title },
+              { label: t.breadcrumb.home, href: "/" },
+              { label: sectionLabel },
+              { label: displayTitle },
             ]}
           />
         </div>
@@ -61,7 +80,7 @@ export default async function ContentPageView({ params }: Props) {
           <div className="relative mb-8 aspect-[21/9] overflow-hidden border border-zinc-200 bg-white">
             <Image
               src={page.image_url}
-              alt={page.title}
+              alt={displayTitle}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 768px"
@@ -71,7 +90,7 @@ export default async function ContentPageView({ params }: Props) {
           </div>
         )}
 
-        <h1 className="text-3xl font-bold text-zinc-900">{page.title}</h1>
+        <h1 className="text-3xl font-bold text-zinc-900">{displayTitle}</h1>
 
         {html ? (
           <div
@@ -80,7 +99,7 @@ export default async function ContentPageView({ params }: Props) {
           />
         ) : (
           <p className="mt-8 text-sm text-zinc-500">
-            Bu sayfanın içeriği henüz eklenmemiş.
+            {locale === "en" ? "No content yet." : locale === "ru" ? "Содержимое ещё не добавлено." : locale === "ar" ? "لا يوجد محتوى بعد." : "Bu sayfanın içeriği henüz eklenmemiş."}
           </p>
         )}
       </article>

@@ -4,9 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { NAV_MAIN, MOBILE_MENU } from "@/lib/site-data";
 import { useI18n } from "@/lib/i18n/context";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { SearchOverlay } from "./SearchOverlay";
+import type { NavItem } from "@/lib/supabase/types";
 
 function IconMenu(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -32,10 +33,11 @@ function IconPhone(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-export function SiteHeader() {
+export function SiteHeader({ navItems }: { navItems: NavItem[] }) {
   const pathname = usePathname();
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   function navLabel(href: string, fallback: string): string {
     const map: Record<string, string> = {
@@ -88,12 +90,12 @@ export function SiteHeader() {
 
           <nav className="hidden flex-1 justify-center md:flex">
             <ul className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-800 lg:gap-x-6 lg:text-xs">
-              {NAV_MAIN.map((item) => {
+              {navItems.map((item) => {
                 const active =
                   !item.href.includes("#") &&
                   (pathname === item.href || pathname.startsWith(`${item.href}/`));
                 return (
-                  <li key={item.href}>
+                  <li key={item.id}>
                     <Link
                       href={item.href}
                       className={`py-1 transition hover:text-zinc-950 ${active ? "text-zinc-950 underline decoration-2 underline-offset-4" : ""}`}
@@ -107,6 +109,17 @@ export function SiteHeader() {
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="rounded-sm p-2 text-zinc-700 transition hover:bg-zinc-100"
+              aria-label="Arama"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m21 21-4.35-4.35" strokeLinecap="round" />
+              </svg>
+            </button>
             <LanguageSwitcher />
             <Link
               href="/iletisim"
@@ -155,8 +168,16 @@ export function SiteHeader() {
           </div>
           <nav className="flex-1 overflow-y-auto">
             <ul className="divide-y divide-zinc-100">
-              {MOBILE_MENU.map((item) => (
-                <li key={item.href}>
+              <li>
+                <Link
+                  href="/"
+                  className="block px-4 py-3.5 text-sm font-medium uppercase tracking-wide text-zinc-800 hover:bg-zinc-50"
+                >
+                  {t.nav.home}
+                </Link>
+              </li>
+              {navItems.map((item) => (
+                <li key={item.id}>
                   <Link
                     href={item.href}
                     className="block px-4 py-3.5 text-sm font-medium uppercase tracking-wide text-zinc-800 hover:bg-zinc-50"
@@ -169,6 +190,7 @@ export function SiteHeader() {
           </nav>
         </div>
       </div>
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }

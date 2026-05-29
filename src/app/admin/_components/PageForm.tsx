@@ -10,11 +10,26 @@ interface Props {
   page: ContentPage
 }
 
+const LOCALES = [
+  { code: "en", label: "English" },
+  { code: "ru", label: "Русский" },
+  { code: "ar", label: "العربية" },
+] as const
+
+async function translateText(text: string, targetLang: string): Promise<string> {
+  if (!text.trim()) return ""
+  const res = await fetch(`/api/translate?text=${encodeURIComponent(text)}&target=${targetLang}`)
+  const json = await res.json() as { translated?: string }
+  return json.translated ?? text
+}
+
 export function PageForm({ page }: Props) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [translating, setTranslating] = useState(false)
+  const [transStatus, setTransStatus] = useState("")
 
   const [title, setTitle] = useState(page.title)
   const [content, setContent] = useState(page.content ?? "")
@@ -53,6 +68,67 @@ export function PageForm({ page }: Props) {
     setSuccess("Sayfa kaydedildi!")
     setSaving(false)
     router.refresh()
+  }
+
+  async function handleAutoTranslate() {
+    if (!title.trim() && !content.trim()) {
+      setTransStatus("Çevrilecek içerik yok.")
+      return
+    }
+    setTranslating(true)
+    setTransStatus("")
+
+    try {
+      const supabase = createClient()
+
+      // Önce mevcut translations'ı al
+      const { data: existing } = await supabase
+        .from("content_pages")
+        .select("translations")
+        .eq("slug", page.slug)
+        .single()
+      const currentTrans = (existing?.translations as Record<string, unknown>) ?? {}
+
+      for (const loc of LOCALES) {
+        setTransStatus(`${loc.label} çevriliyor...`)
+
+        const [transTitle, transContent] = await Promise.all([
+          title.trim() ? translateText(title, loc.code) : Promise.resolve(""),
+          content.trim() ? translateText(content, loc.code) : Promise.resolve(""),
+        ])
+
+        currentTrans[loc.code] = {
+          title: transTitle || title,
+          content: transContent || content,
+        }
+      }
+
+      // DB'ye kaydet
+      const { error: err } = await supabase
+        .from("content_pages")
+        .upsert({
+          slug: page.slug,
+          section: page.section,
+          title: title.trim(),
+          content: content.trim() || null,
+          image_url: imageUrl || null,
+          link_url: linkUrl.trim() || null,
+          is_active: isActive,
+          sort_order: parseInt(sortOrder) || 0,
+          translations: currentTrans,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "slug" })
+
+      if (err) {
+        setTransStatus(`Hata: ${err.message}`)
+      } else {
+        setTransStatus("✓ EN, RU, AR çevirileri kaydedildi!")
+      }
+    } catch (e) {
+      setTransStatus(`Hata: ${String(e)}`)
+    }
+
+    setTranslating(false)
   }
 
   return (
@@ -125,11 +201,13 @@ export function PageForm({ page }: Props) {
 
       <div className="border border-zinc-200 bg-white p-6">
         <h2 className="mb-5 text-xs font-bold uppercase tracking-wider text-zinc-500">
-          İçerik
+          İçerik (Türkçe)
         </h2>
         <p className="mb-3 text-xs text-zinc-400">
-          Paragraflar için satır arası boşluk bırakın. Kalın yazı için{" "}
-          <code className="bg-zinc-100 px-1">**metin**</code> kullanın.
+          Başlık için <code className="bg-zinc-100 px-1"># Başlık</code>,
+          alt başlık için <code className="bg-zinc-100 px-1">## Alt Başlık</code>,
+          liste için <code className="bg-zinc-100 px-1">* madde</code>,
+          kalın için <code className="bg-zinc-100 px-1">**metin**</code>
         </p>
         <textarea
           value={content}
@@ -138,6 +216,28 @@ export function PageForm({ page }: Props) {
           className="w-full border border-zinc-200 px-3 py-2 text-sm leading-relaxed outline-none focus:border-zinc-900"
           placeholder="Sayfa içeriğini buraya yazın..."
         />
+      </div>
+
+      {/* Otomatik çeviri */}
+      <div className="border border-zinc-200 bg-white p-6">
+        <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-zinc-500">
+          Otomatik Çeviri
+        </h2>
+        <p className="mb-4 text-xs text-zinc-400">
+          Türkçe başlık ve içeriği İngilizce, Rusça ve Arapçaya otomatik çevirir.
+          Önce &quot;Güncelle&quot; ile Türkçeyi kaydedin, ardından çevirin.
+        </p>
+        <button
+          type="button"
+          onClick={handleAutoTranslate}
+          disabled={translating}
+          className="h-10 border border-zinc-300 bg-zinc-50 px-5 text-xs font-bold uppercase tracking-wider text-zinc-700 transition hover:border-zinc-900 hover:bg-white disabled:opacity-60"
+        >
+          {translating ? "Çevriliyor..." : "Otomatik Çevir (EN / RU / AR)"}
+        </button>
+        {transStatus && (
+          <p className="mt-2 text-xs text-zinc-500">{transStatus}</p>
+        )}
       </div>
 
       <div className="space-y-3">

@@ -3,7 +3,7 @@ import { CategoryShowcase } from "@/components/home/CategoryShowcase"
 import { HeroSlider } from "@/components/home/HeroSlider"
 import { ProductCarousel } from "@/components/home/ProductCarousel"
 import { ProjectsStrip } from "@/components/home/ProjectsStrip"
-import { TrustBar } from "@/components/home/TrustBar"
+import { TrustBar, type TrustItem } from "@/components/home/TrustBar"
 import { getLocale } from "@/lib/i18n/server"
 import { getDict } from "@/lib/i18n/dict"
 import { createClient } from "@/lib/supabase/server"
@@ -21,6 +21,7 @@ export default async function HomePage() {
     { data: slidersRaw },
     { data: categoriesRaw },
     { data: featuredRaw },
+    { data: trustRaw },
   ] = await Promise.all([
     supabase
       .from("sliders")
@@ -37,10 +38,15 @@ export default async function HomePage() {
       .from("featured_products")
       .select("*, products(*)")
       .order("sort_order"),
+    supabase
+      .from("trust_items")
+      .select("*")
+      .order("sort_order"),
   ])
 
   const sliders: Slider[] = slidersRaw ?? []
   const categories: Category[] = categoriesRaw ?? []
+  const trustItems: TrustItem[] = (trustRaw ?? []) as TrustItem[]
 
   const featuredProducts: CatalogProduct[] =
     (featuredRaw ?? [])
@@ -59,7 +65,7 @@ export default async function HomePage() {
     <main className="flex-1">
       <HeroSlider slides={sliders} />
       <CategoryShowcase categories={categories} />
-      <TrustBar />
+      <TrustBar items={trustItems} />
       <ProductCarousel
         id="one-cikan"
         title={t.home.featured}

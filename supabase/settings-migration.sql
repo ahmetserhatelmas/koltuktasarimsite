@@ -25,5 +25,10 @@ INSERT INTO public.settings (key, value, label) VALUES
   ('contact_phone',   '+90 543 841 25 50', 'Telefon'),
   ('contact_whatsapp','905438412550', 'WhatsApp Numarası'),
   ('contact_email',   '', 'E-posta'),
-  ('contact_address', '', 'Adres')
+  ('contact_address', '', 'Adres'),
+  ('social_instagram', '', 'Instagram URL'),
+  ('social_facebook',  '', 'Facebook URL'),
+  ('social_x',         '', 'X (Twitter) URL'),
+  ('social_linkedin',  '', 'LinkedIn URL'),
+  ('social_youtube',   '', 'YouTube URL')
 ON CONFLICT (key) DO NOTHING;

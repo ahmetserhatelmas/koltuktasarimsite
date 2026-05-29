@@ -23,7 +23,6 @@ export const NAV_MAIN = [
   { href: "/bar-taburesi", label: "Bar Tabure" },
   { href: "/stadyum", label: "Stadyum" },
   { href: "/#projeler", label: "Projeler" },
-  { href: "/iletisim", label: "İletişim" },
 ] as const;
 
 export const MOBILE_MENU = [{ href: "/", label: "Ana Sayfa" }, ...NAV_MAIN] as const;

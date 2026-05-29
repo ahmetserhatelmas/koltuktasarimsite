@@ -6,7 +6,11 @@ import { createClient } from "@/lib/supabase/client"
 import type { Slider } from "@/lib/supabase/types"
 import { ImageUpload } from "../_components/ImageUpload"
 
-const EMPTY_SLIDER: Omit<Slider, "id" | "created_at"> = {
+type SliderFormData = Omit<Slider, "id" | "created_at"> & {
+  translations?: Record<string, { accent?: string; headline_italic?: string; headline_bold?: string; sub_text?: string }>
+}
+
+const EMPTY_SLIDER: SliderFormData = {
   accent: "",
   headline_italic: "",
   headline_bold: "",
@@ -15,15 +19,18 @@ const EMPTY_SLIDER: Omit<Slider, "id" | "created_at"> = {
   link: null,
   sort_order: 0,
   is_active: true,
+  translations: {},
 }
 
 export default function AdminSlidersPage() {
   const [sliders, setSliders] = useState<Slider[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | "new" | null>(null)
-  const [formData, setFormData] = useState<typeof EMPTY_SLIDER>(EMPTY_SLIDER)
+  const [formData, setFormData] = useState<SliderFormData>(EMPTY_SLIDER)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
+  const [translating, setTranslating] = useState(false)
+  const [transStatus, setTransStatus] = useState("")
 
   async function load() {
     const supabase = createClient()
@@ -51,8 +58,10 @@ export default function AdminSlidersPage() {
       link: slider.link,
       sort_order: slider.sort_order,
       is_active: slider.is_active,
+      translations: (slider.translations as SliderFormData["translations"]) ?? {},
     })
     setError("")
+    setTransStatus("")
   }
 
   function startNew() {
@@ -71,17 +80,25 @@ export default function AdminSlidersPage() {
     setError("")
 
     const supabase = createClient()
+    const payload = {
+      accent: formData.accent || null,
+      headline_italic: formData.headline_italic || null,
+      headline_bold: formData.headline_bold || null,
+      sub_text: formData.sub_text || null,
+      image_url: formData.image_url,
+      link: formData.link || null,
+      sort_order: formData.sort_order,
+      is_active: formData.is_active,
+      translations: formData.translations ?? {},
+    }
 
     if (editingId === "new") {
-      const { error: err } = await supabase.from("sliders").insert({
-        ...formData,
-        link: formData.link || null,
-      })
+      const { error: err } = await supabase.from("sliders").insert(payload)
       if (err) { setError(err.message); setSaving(false); return }
     } else {
       const { error: err } = await supabase
         .from("sliders")
-        .update({ ...formData, link: formData.link || null })
+        .update(payload)
         .eq("id", editingId!)
       if (err) { setError(err.message); setSaving(false); return }
     }
@@ -109,8 +126,46 @@ export default function AdminSlidersPage() {
     )
   }
 
-  function setF<K extends keyof typeof EMPTY_SLIDER>(k: K, v: typeof EMPTY_SLIDER[K]) {
+  function setF<K extends keyof SliderFormData>(k: K, v: SliderFormData[K]) {
     setFormData((p) => ({ ...p, [k]: v }))
+  }
+
+  async function handleAutoTranslate() {
+    setTranslating(true)
+    setTransStatus("Çeviriliyor...")
+    try {
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.headline_bold,
+          description_intro: formData.sub_text,
+          description_footer: [formData.accent, formData.headline_italic].filter(Boolean).join(" | "),
+          description_bullets: [],
+          description_specs: [],
+        }),
+      })
+      if (!res.ok) throw new Error("API hatası")
+      const data = await res.json()
+      const translations: SliderFormData["translations"] = {}
+      for (const lang of ["en", "ru", "ar"] as const) {
+        const tr = data.translations?.[lang]
+        if (!tr) continue
+        const parts = (tr.description_footer as string | undefined)?.split(" | ") ?? []
+        translations[lang] = {
+          accent: parts[0] || undefined,
+          headline_italic: parts[1] || undefined,
+          headline_bold: tr.name || undefined,
+          sub_text: tr.description_intro || undefined,
+        }
+      }
+      setFormData((p) => ({ ...p, translations }))
+      setTransStatus("✓ Çeviri tamamlandı (EN, RU, AR)")
+    } catch {
+      setTransStatus("✗ Çeviri başarısız")
+    } finally {
+      setTranslating(false)
+    }
   }
 
   return (
@@ -244,7 +299,7 @@ export default function AdminSlidersPage() {
             </div>
           </div>
 
-          <div className="mt-5 flex gap-3">
+          <div className="mt-5 flex flex-wrap items-center gap-3">
             <button
               type="submit"
               disabled={saving}
@@ -254,11 +309,24 @@ export default function AdminSlidersPage() {
             </button>
             <button
               type="button"
+              onClick={handleAutoTranslate}
+              disabled={translating || !formData.headline_bold}
+              className="h-10 border border-blue-300 bg-blue-50 px-5 text-xs font-semibold text-blue-700 hover:bg-blue-100 disabled:opacity-50"
+            >
+              {translating ? "Çeviriliyor..." : "🌐 Otomatik Çevir (EN/RU/AR)"}
+            </button>
+            <button
+              type="button"
               onClick={() => setEditingId(null)}
               className="h-10 border border-zinc-200 px-5 text-xs font-semibold text-zinc-600 hover:border-zinc-900"
             >
               İptal
             </button>
+            {transStatus && (
+              <span className={`text-xs font-medium ${transStatus.startsWith("✓") ? "text-green-600" : transStatus.startsWith("✗") ? "text-red-600" : "text-zinc-500"}`}>
+                {transStatus}
+              </span>
+            )}
           </div>
         </form>
       )}

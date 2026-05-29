@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { MOBILE_MENU, NAV_MAIN } from "@/lib/site-data";
+import { NAV_MAIN, MOBILE_MENU } from "@/lib/site-data";
+import { useI18n } from "@/lib/i18n/context";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 function IconMenu(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -32,7 +34,20 @@ function IconPhone(props: React.SVGProps<SVGSVGElement>) {
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
+
+  function navLabel(href: string, fallback: string): string {
+    const map: Record<string, string> = {
+      "/konferans-sandalyeleri": t.category["konferans-sandalyeleri"],
+      "/konferans-koltuklari":   t.category["konferans-koltuklari"],
+      "/bar-taburesi":           t.category.bar,
+      "/stadyum":                t.category.stadyum,
+      "/iletisim":               t.nav.contact,
+      "/#projeler":              t.nav.projects,
+    }
+    return map[href] ?? fallback
+  }
 
   useEffect(() => {
     queueMicrotask(() => setOpen(false));
@@ -50,7 +65,7 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-zinc-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3.5 sm:gap-4 sm:px-6 sm:py-4 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4 sm:gap-4 sm:px-6 sm:py-5 lg:px-8">
           <button
             type="button"
             onClick={() => setOpen(true)}
@@ -66,7 +81,7 @@ export function SiteHeader() {
               alt="Koltuk Dünyası"
               width={944}
               height={644}
-              className="h-11 w-auto sm:h-12 md:h-14 lg:h-14"
+              className="h-14 w-auto sm:h-16 md:h-[4.5rem] lg:h-20"
               priority
             />
           </Link>
@@ -83,7 +98,7 @@ export function SiteHeader() {
                       href={item.href}
                       className={`py-1 transition hover:text-zinc-950 ${active ? "text-zinc-950 underline decoration-2 underline-offset-4" : ""}`}
                     >
-                      {item.label}
+                      {navLabel(item.href, item.label)}
                     </Link>
                   </li>
                 );
@@ -91,13 +106,14 @@ export function SiteHeader() {
             </ul>
           </nav>
 
-          <div className="ml-auto flex items-center">
+          <div className="ml-auto flex items-center gap-2">
+            <LanguageSwitcher />
             <Link
               href="/iletisim"
               className="hidden items-center gap-2 rounded-sm border border-zinc-900 px-4 py-2 text-xs font-bold uppercase tracking-wider text-zinc-900 transition hover:bg-zinc-900 hover:text-white sm:flex"
             >
               <IconPhone className="h-4 w-4" />
-              İletişim
+              {t.nav.contact}
             </Link>
           </div>
         </div>
@@ -126,7 +142,7 @@ export function SiteHeader() {
               alt="Koltuk Dünyası"
               width={944}
               height={644}
-              className="h-9 w-auto"
+              className="h-11 w-auto"
             />
             <button
               type="button"
@@ -145,7 +161,7 @@ export function SiteHeader() {
                     href={item.href}
                     className="block px-4 py-3.5 text-sm font-medium uppercase tracking-wide text-zinc-800 hover:bg-zinc-50"
                   >
-                    {item.label}
+                    {navLabel(item.href, item.label)}
                   </Link>
                 </li>
               ))}

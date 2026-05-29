@@ -1,3 +1,7 @@
+"use client"
+
+import { useI18n } from "@/lib/i18n/context"
+
 function IconTruck(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" {...props}>
@@ -6,7 +10,7 @@ function IconTruck(props: React.SVGProps<SVGSVGElement>) {
       <circle cx="7" cy="18" r="2" />
       <circle cx="17" cy="18" r="2" />
     </svg>
-  );
+  )
 }
 
 function IconReturn(props: React.SVGProps<SVGSVGElement>) {
@@ -16,7 +20,7 @@ function IconReturn(props: React.SVGProps<SVGSVGElement>) {
       <path d="M8 17H4v-5" strokeLinejoin="round" />
       <path d="M7 12 4 9l3-3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
-  );
+  )
 }
 
 function IconPhone(props: React.SVGProps<SVGSVGElement>) {
@@ -27,7 +31,7 @@ function IconPhone(props: React.SVGProps<SVGSVGElement>) {
         strokeLinejoin="round"
       />
     </svg>
-  );
+  )
 }
 
 function IconChair(props: React.SVGProps<SVGSVGElement>) {
@@ -37,33 +41,20 @@ function IconChair(props: React.SVGProps<SVGSVGElement>) {
       <path d="M8 14V9a3 3 0 0 1 3-3h2a3 3 0 0 1 3 3v5" strokeLinejoin="round" />
       <path d="M9 21h6" strokeLinecap="round" />
     </svg>
-  );
+  )
 }
 
-const items = [
-  {
-    title: "Hızlı Gönderim",
-    desc: "Siparişleriniz hızlıca teslim edilir.",
-    Icon: IconTruck,
-  },
-  {
-    title: "Kolay İade",
-    desc: "Sorunsuz iade ve değişim.",
-    Icon: IconReturn,
-  },
-  {
-    title: "Hızlı İletişim",
-    desc: "WhatsApp ile online destek.",
-    Icon: IconPhone,
-  },
-  {
-    title: "Kaliteli Ürünler",
-    desc: "Ergonomi ve dayanıklılık önceliğimiz.",
-    Icon: IconChair,
-  },
-] as const;
-
 export function TrustBar() {
+  const { t } = useI18n()
+  const h = t.home
+
+  const items = [
+    { title: h.trust_ship_title,    desc: h.trust_ship_desc,    Icon: IconTruck  },
+    { title: h.trust_return_title,  desc: h.trust_return_desc,  Icon: IconReturn },
+    { title: h.trust_support_title, desc: h.trust_support_desc, Icon: IconPhone  },
+    { title: h.trust_quality_title, desc: h.trust_quality_desc, Icon: IconChair  },
+  ]
+
   return (
     <section className="border-y border-zinc-200 bg-white py-10 sm:py-12">
       <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:gap-8 lg:px-8">
@@ -78,5 +69,5 @@ export function TrustBar() {
         ))}
       </div>
     </section>
-  );
+  )
 }

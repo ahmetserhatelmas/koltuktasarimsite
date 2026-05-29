@@ -1,7 +1,12 @@
 "use client"
 
+import Image from "next/image"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { parseAnnouncementItems } from "@/lib/announcements"
+import { SOCIAL_PLATFORMS } from "@/lib/social"
+import { AnnouncementEditor } from "../_components/AnnouncementEditor"
+import { ImageUpload } from "../_components/ImageUpload"
 
 type Setting = {
   key: string
@@ -15,6 +20,10 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState("")
+  const [announcementEnabled, setAnnouncementEnabled] = useState(true)
+  const [announcementItems, setAnnouncementItems] = useState<string[]>([])
+  const [translating, setTranslating] = useState(false)
+  const [transStatus, setTransStatus] = useState("")
 
   async function load() {
     const supabase = createClient()
@@ -22,7 +31,41 @@ export default function AdminSettingsPage() {
       .from("settings")
       .select("*")
       .order("key")
-    setSettings(data ?? [])
+    const map = Object.fromEntries((data ?? []).map((s) => [s.key, s.value]))
+    const existingKeys = new Set((data ?? []).map((s) => s.key))
+    const merged = [...(data ?? [])]
+    for (const platform of SOCIAL_PLATFORMS) {
+      if (!existingKeys.has(platform.key)) {
+        merged.push({ key: platform.key, value: "", label: platform.label })
+      }
+    }
+    setSettings(merged)
+
+    setAnnouncementEnabled(map.announcement_enabled !== "false")
+    const parsed = parseAnnouncementItems(map.announcement_items)
+    setAnnouncementItems(
+      parsed.length > 0
+        ? parsed
+        : [
+            "9 AYA VARAN TAKSİT İMKANI",
+            "TOPTAN SATIŞ İÇİN **BİZİ ARAYIN!**",
+            "TÜM ALIŞVERİŞLERİNİZE **ÜCRETSİZ TESLİMAT!**",
+          ]
+    )
+
+    // Çeviri satırları yoksa ekle
+    const transKeys = ["announcement_items_en", "announcement_items_ru", "announcement_items_ar"]
+    const transLabels: Record<string, string> = {
+      announcement_items_en: "Duyuru Metinleri — English",
+      announcement_items_ru: "Duyuru Metinleri — Русский",
+      announcement_items_ar: "Duyuru Metinleri — العربية",
+    }
+    for (const key of transKeys) {
+      if (!existingKeys.has(key)) {
+        merged.push({ key, value: "", label: transLabels[key] })
+      }
+    }
+    setSettings(merged)
     setLoading(false)
   }
 
@@ -45,14 +88,61 @@ export default function AdminSettingsPage() {
 
     const supabase = createClient()
 
-    const updates = settings.map((s) =>
-      supabase
-        .from("settings")
-        .update({ value: s.value, updated_at: new Date().toISOString() })
-        .eq("key", s.key)
+    const contactKeys = new Set([
+      "map_embed_url",
+      "contact_phone",
+      "contact_whatsapp",
+      "contact_email",
+      "contact_address",
+      "default_certificate_url",
+    ])
+    const socialKeys = new Set(SOCIAL_PLATFORMS.map((p) => p.key))
+
+    const updates = settings
+      .filter((s) => contactKeys.has(s.key))
+      .map((s) =>
+        supabase
+          .from("settings")
+          .update({ value: s.value, updated_at: new Date().toISOString() })
+          .eq("key", s.key)
+      )
+
+    const socialUpsert = supabase.from("settings").upsert(
+      settings
+        .filter((s) => socialKeys.has(s.key))
+        .map((s) => ({
+          key: s.key,
+          value: s.value.trim(),
+          label: SOCIAL_PLATFORMS.find((p) => p.key === s.key)?.label ?? s.label,
+          updated_at: new Date().toISOString(),
+        }))
     )
 
-    const results = await Promise.all(updates)
+    const announcementTranslationKeys = ["announcement_items_en", "announcement_items_ru", "announcement_items_ar"]
+    const translatedSettings = settings.filter((s) => announcementTranslationKeys.includes(s.key))
+
+    const announcementUpsert = supabase.from("settings").upsert([
+      {
+        key: "announcement_enabled",
+        value: announcementEnabled ? "true" : "false",
+        label: "Duyuru Bandı Aktif",
+        updated_at: new Date().toISOString(),
+      },
+      {
+        key: "announcement_items",
+        value: JSON.stringify(announcementItems.filter((i) => i.trim())),
+        label: "Duyuru Metinleri (JSON)",
+        updated_at: new Date().toISOString(),
+      },
+      ...translatedSettings.map((s) => ({
+        key: s.key,
+        value: s.value,
+        label: s.label,
+        updated_at: new Date().toISOString(),
+      })),
+    ])
+
+    const results = await Promise.all([...updates, socialUpsert, announcementUpsert])
     const failed = results.find((r) => r.error)
 
     if (failed?.error) {
@@ -66,14 +156,63 @@ export default function AdminSettingsPage() {
     setTimeout(() => setSuccess(false), 3000)
   }
 
+  async function handleTranslateAnnouncements() {
+    if (announcementItems.filter(Boolean).length === 0) return
+    setTranslating(true)
+    setTransStatus("Çeviriliyor...")
+    try {
+      const langs: Array<{ code: string; key: string; label: string }> = [
+        { code: "en", key: "announcement_items_en", label: "English" },
+        { code: "ru", key: "announcement_items_ru", label: "Русский" },
+        { code: "ar", key: "announcement_items_ar", label: "العربية" },
+      ]
+      const translated: Record<string, string[]> = { en: [], ru: [], ar: [] }
+
+      for (const item of announcementItems.filter(Boolean)) {
+        const res = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: item,
+            description_intro: "",
+            description_footer: "",
+            description_bullets: [],
+            description_specs: [],
+          }),
+        })
+        if (!res.ok) continue
+        const data = await res.json()
+        for (const lang of langs) {
+          const tr = data.translations?.[lang.code]
+          if (tr?.name) translated[lang.code].push(tr.name)
+        }
+      }
+
+      setSettings((prev) =>
+        prev.map((s) => {
+          const lang = langs.find((l) => l.key === s.key)
+          if (!lang) return s
+          const items = translated[lang.code]
+          return { ...s, value: items.length > 0 ? JSON.stringify(items) : s.value }
+        })
+      )
+      setTransStatus("✓ Duyurular çevrildi (EN, RU, AR)")
+    } catch {
+      setTransStatus("✗ Çeviri başarısız")
+    } finally {
+      setTranslating(false)
+    }
+  }
+
   const mapSetting = settings.find((s) => s.key === "map_embed_url")
+  const certSetting = settings.find((s) => s.key === "default_certificate_url")
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-zinc-900">Site Ayarları</h1>
         <p className="mt-1 text-sm text-zinc-500">
-          İletişim bilgileri ve harita konumu
+          Duyuru bandı, iletişim bilgileri, sosyal medya ve harita konumu
         </p>
       </div>
 
@@ -92,6 +231,60 @@ export default function AdminSettingsPage() {
             </div>
           )}
 
+          <AnnouncementEditor
+            enabled={announcementEnabled}
+            items={announcementItems}
+            onEnabledChange={setAnnouncementEnabled}
+            onItemsChange={setAnnouncementItems}
+          />
+
+          {/* Duyuru Çevirisi */}
+          <div className="border border-zinc-200 bg-white p-6">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                  Duyuru Bandı Çevirisi
+                </h2>
+                <p className="mt-1 text-xs text-zinc-400">
+                  Üstteki duyuruları EN/RU/AR diline otomatik çevirin. Kaydet ile birlikte uygulanır.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleTranslateAnnouncements}
+                disabled={translating || announcementItems.filter(Boolean).length === 0}
+                className="h-9 shrink-0 border border-blue-300 bg-blue-50 px-4 text-xs font-semibold text-blue-700 hover:bg-blue-100 disabled:opacity-50"
+              >
+                {translating ? "Çeviriliyor..." : "🌐 Otomatik Çevir"}
+              </button>
+            </div>
+            {transStatus && (
+              <p className={`mb-3 text-xs font-medium ${transStatus.startsWith("✓") ? "text-green-600" : "text-red-600"}`}>
+                {transStatus}
+              </p>
+            )}
+            {(["announcement_items_en", "announcement_items_ru", "announcement_items_ar"] as const).map((key) => {
+              const s = settings.find((x) => x.key === key)
+              if (!s) return null
+              let preview: string[] = []
+              try { preview = JSON.parse(s.value) } catch { /* empty */ }
+              return (
+                <div key={key} className="mb-3">
+                  <p className="mb-1 text-xs font-semibold text-zinc-500">{s.label}</p>
+                  {preview.length > 0 ? (
+                    <ul className="space-y-1">
+                      {preview.map((item, i) => (
+                        <li key={i} className="text-xs text-zinc-600">• {item}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-zinc-400 italic">Henüz çevrilmedi</p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
           {/* İletişim Bilgileri */}
           <div className="border border-zinc-200 bg-white p-6">
             <h2 className="mb-5 text-xs font-bold uppercase tracking-wider text-zinc-500">
@@ -99,7 +292,11 @@ export default function AdminSettingsPage() {
             </h2>
             <div className="space-y-4">
               {settings
-                .filter((s) => s.key !== "map_embed_url")
+                .filter((s) =>
+                  ["contact_phone", "contact_whatsapp", "contact_email", "contact_address"].includes(
+                    s.key
+                  )
+                )
                 .map((s) => (
                   <div key={s.key}>
                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
@@ -114,6 +311,67 @@ export default function AdminSettingsPage() {
                     />
                   </div>
                 ))}
+            </div>
+          </div>
+
+          {/* Sertifika Görseli */}
+          <div className="border border-zinc-200 bg-white p-6">
+            <h2 className="mb-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
+              Varsayılan Sertifika Görseli
+            </h2>
+            <p className="mb-5 text-xs text-zinc-500">
+              Ürün sayfalarında gösterilecek sertifika bandı. Ürün bazında özel görsel yüklenirse bu görselin önüne geçer.
+            </p>
+            <ImageUpload
+              value={certSetting?.value ?? "/brand/certificate.png"}
+              onChange={(url) => {
+                if (certSetting) {
+                  updateValue("default_certificate_url", url)
+                }
+              }}
+              label="Sertifika Görseli"
+            />
+            {(certSetting?.value || "/brand/certificate.png") && (
+              <div className="mt-4 overflow-hidden rounded border border-zinc-100 bg-zinc-50">
+                <Image
+                  src={certSetting?.value || "/brand/certificate.png"}
+                  alt="Sertifika önizleme"
+                  width={900}
+                  height={200}
+                  className="h-auto w-full object-contain"
+                  unoptimized
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Sosyal Medya */}
+          <div className="border border-zinc-200 bg-white p-6">
+            <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-zinc-500">
+              Sosyal Medya
+            </h2>
+            <p className="mb-5 text-xs text-zinc-500">
+              Footer&apos;daki &quot;Bizi Takip Edin&quot; bölümünde gösterilir. Boş bırakılan
+              ikonlar görünür kalır, tıklanamaz.
+            </p>
+            <div className="space-y-4">
+              {SOCIAL_PLATFORMS.map((platform) => {
+                const setting = settings.find((s) => s.key === platform.key)
+                return (
+                  <div key={platform.key}>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                      {platform.label}
+                    </label>
+                    <input
+                      type="url"
+                      value={setting?.value ?? ""}
+                      onChange={(e) => updateValue(platform.key, e.target.value)}
+                      className="h-10 w-full border border-zinc-200 px-3 text-sm outline-none focus:border-zinc-900"
+                      placeholder={platform.placeholder}
+                    />
+                  </div>
+                )
+              })}
             </div>
           </div>
 

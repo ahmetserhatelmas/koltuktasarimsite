@@ -10,6 +10,7 @@ const NAV = [
   { href: "/admin/sliders", label: "Slider", icon: "▦" },
   { href: "/admin/categories", label: "Kategoriler", icon: "⊟" },
   { href: "/admin/featured", label: "Öne Çıkanlar", icon: "★" },
+  { href: "/admin/pages", label: "Sayfalar", icon: "☰" },
   { href: "/admin/settings", label: "Ayarlar", icon: "⚙" },
 ]
 

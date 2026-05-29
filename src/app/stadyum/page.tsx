@@ -1,5 +1,7 @@
 import { CatalogPage } from "@/components/catalog/CatalogPage"
 import { createClient } from "@/lib/supabase/server"
+import { getLocale } from "@/lib/i18n/server"
+import { getDict } from "@/lib/i18n/dict"
 import type { CatalogProduct } from "@/lib/products"
 
 export const dynamic = "force-dynamic"
@@ -9,6 +11,8 @@ export const metadata = {
 }
 
 export default async function StadyumPage() {
+  const locale = await getLocale()
+  const t = getDict(locale)
   const supabase = await createClient()
   const { data } = await supabase
     .from("products")
@@ -24,13 +28,14 @@ export default async function StadyumPage() {
     price: p.price ?? 0,
     oldPrice: p.old_price ?? 0,
     quoteOnly: p.quote_only,
+    translations: p.translations ?? {},
   }))
 
   return (
     <CatalogPage
-      title="Stadyum Koltukları"
+      title={t.category.stadyum}
       products={products}
-      breadcrumbParent={{ label: "Kategoriler", href: "/" }}
+      breadcrumbParent={{ label: t.breadcrumb.products, href: "/" }}
     />
   )
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -8,6 +9,9 @@ import { AllImagesEditor } from "./AllImagesEditor"
 import { SpecsEditor } from "./SpecsEditor"
 import { BulletsEditor } from "./BulletsEditor"
 import { ColorsEditor } from "./ColorsEditor"
+import { ImageUpload } from "./ImageUpload"
+
+const DEFAULT_CERTIFICATE_URL = "/brand/certificate.png"
 
 const CATEGORIES: { value: ProductCategory; label: string }[] = [
   { value: "bar", label: "Bar Taburesi" },
@@ -32,6 +36,9 @@ type FormData = {
   description_footer: string
   is_active: boolean
   sort_order: string
+  show_certificate: boolean
+  certificate_url: string
+  translations: Record<string, unknown>
 }
 
 interface Props {
@@ -44,6 +51,35 @@ export function ProductForm({ initial, mode }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+
+  const [translating, setTranslating] = useState(false)
+  const [transStatus, setTransStatus] = useState("")
+
+  async function handleAutoTranslate() {
+    setTranslating(true)
+    setTransStatus("Çeviriliyor...")
+    try {
+      const res = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          description_intro: form.description_intro,
+          description_footer: form.description_footer,
+          description_bullets: form.description_bullets,
+          description_specs: form.description_specs,
+        }),
+      })
+      if (!res.ok) throw new Error("API hatası")
+      const data = await res.json()
+      setForm((prev) => ({ ...prev, translations: data.translations }))
+      setTransStatus("✓ Çeviri tamamlandı (EN, RU, AR)")
+    } catch {
+      setTransStatus("✗ Çeviri başarısız")
+    } finally {
+      setTranslating(false)
+    }
+  }
 
   const [form, setForm] = useState<FormData>({
     id: initial?.id ?? "",
@@ -61,6 +97,9 @@ export function ProductForm({ initial, mode }: Props) {
     description_footer: initial?.description_footer ?? "",
     is_active: initial?.is_active ?? true,
     sort_order: initial?.sort_order?.toString() ?? "0",
+    show_certificate: initial?.show_certificate ?? true,
+    certificate_url: initial?.certificate_url ?? "",
+    translations: (initial as (typeof initial & { translations?: Record<string, unknown> }))?.translations ?? {},
   })
 
   function set<K extends keyof FormData>(key: K, value: FormData[K]) {
@@ -90,6 +129,9 @@ export function ProductForm({ initial, mode }: Props) {
       description_footer: form.description_footer || null,
       is_active: form.is_active,
       sort_order: parseInt(form.sort_order) || 0,
+      show_certificate: form.show_certificate,
+      certificate_url: form.certificate_url.trim() || null,
+      translations: form.translations,
     }
 
     if (mode === "new") {
@@ -307,6 +349,110 @@ export function ProductForm({ initial, mode }: Props) {
             />
           </div>
         </div>
+      </div>
+
+      {/* Sertifika */}
+      <div className="border border-zinc-200 bg-white p-6">
+        <h2 className="mb-1 text-xs font-bold uppercase tracking-wider text-zinc-500">
+          Sertifika / Belge Görseli
+        </h2>
+        <p className="mb-5 text-xs text-zinc-400">
+          Boş bırakılırsa varsayılan TSE + GARANTİ + DMO bandı kullanılır.
+        </p>
+
+        <label className="mb-4 flex cursor-pointer items-center gap-2 text-sm font-medium text-zinc-700">
+          <input
+            type="checkbox"
+            checked={form.show_certificate}
+            onChange={(e) => set("show_certificate", e.target.checked)}
+            className="h-4 w-4 rounded border-zinc-300"
+          />
+          Sertifika görselini ürün sayfasında göster
+        </label>
+
+        {form.show_certificate && (
+          <div className="space-y-4">
+            <div className="flex items-start gap-4">
+              <div className="flex-1">
+                <ImageUpload
+                  value={form.certificate_url}
+                  onChange={(url) => set("certificate_url", url)}
+                  label="Özel Sertifika Görseli (opsiyonel)"
+                />
+              </div>
+            </div>
+
+            {/* Önizleme */}
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                Önizleme (sayfada gösterilecek)
+              </p>
+              <div className="overflow-hidden rounded border border-zinc-100 bg-zinc-50">
+                <Image
+                  src={form.certificate_url || DEFAULT_CERTIFICATE_URL}
+                  alt="Sertifika görseli"
+                  width={900}
+                  height={200}
+                  className="h-auto w-full object-contain"
+                  unoptimized
+                />
+              </div>
+              {form.certificate_url && (
+                <button
+                  type="button"
+                  onClick={() => set("certificate_url", "")}
+                  className="mt-2 text-xs text-red-500 hover:text-red-700"
+                >
+                  Özel görseli kaldır → varsayılana dön
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Çeviriler */}
+      <div className="border border-zinc-200 bg-white p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+              Otomatik Çeviri
+            </h2>
+            <p className="mt-1 text-xs text-zinc-400">
+              Ürün adı ve açıklamalarını İngilizce, Rusça ve Arapçaya otomatik çevirir.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleAutoTranslate}
+            disabled={translating || !form.name}
+            className="shrink-0 h-9 border border-zinc-300 px-4 text-xs font-semibold text-zinc-700 transition hover:border-zinc-900 hover:text-zinc-900 disabled:opacity-50"
+          >
+            {translating ? "Çeviriliyor..." : "Şimdi Çevir"}
+          </button>
+        </div>
+
+        {transStatus && (
+          <p className={`mt-3 text-xs font-medium ${transStatus.startsWith("✓") ? "text-green-600" : transStatus.startsWith("✗") ? "text-red-600" : "text-zinc-500"}`}>
+            {transStatus}
+          </p>
+        )}
+
+        {Object.keys(form.translations).length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {(["en", "ru", "ar"] as const).map((lang) => {
+              const has = !!(form.translations as Record<string, { name?: string }>)[lang]?.name
+              return (
+                <span
+                  key={lang}
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium ${has ? "border-green-200 bg-green-50 text-green-700" : "border-zinc-200 bg-zinc-50 text-zinc-400"}`}
+                >
+                  {has ? "✓" : "–"} {lang.toUpperCase()}
+                </span>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Durum */}

@@ -7,6 +7,7 @@ export type CatalogProduct = {
   oldPrice: number;
   price: number;
   quoteOnly?: boolean;
+  translations?: Partial<Record<string, { name?: string }>>;
 };
 
 type ManifestItem = {

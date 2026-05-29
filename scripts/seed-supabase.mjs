@@ -229,6 +229,7 @@ async function seedCategories() {
       route: "/konferans-sandalyeleri",
       tagline: "Form, Hilton ve salon sandalye modelleri",
       is_featured: true,
+      is_active: true,
       sort_order: 0,
     },
     {
@@ -239,6 +240,7 @@ async function seedCategories() {
       route: "/konferans-koltuklari",
       tagline: "Dolphin, Martin ve Rom serileri",
       is_featured: true,
+      is_active: true,
       sort_order: 1,
     },
     {
@@ -249,6 +251,7 @@ async function seedCategories() {
       route: "/bar-taburesi",
       tagline: "Kafe, bar ve yüksek masa çözümleri",
       is_featured: true,
+      is_active: true,
       sort_order: 2,
     },
     {
@@ -259,6 +262,7 @@ async function seedCategories() {
       route: "/stadyum",
       tagline: "Omega, Togan ve yedek kulübesi serileri",
       is_featured: true,
+      is_active: true,
       sort_order: 3,
     },
     {
@@ -269,6 +273,7 @@ async function seedCategories() {
       route: "/#projeler",
       tagline: "Tamamlanan kurulum ve referanslar",
       is_featured: false,
+      is_active: true,
       sort_order: 4,
     },
   ]

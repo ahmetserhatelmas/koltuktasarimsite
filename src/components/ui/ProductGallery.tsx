@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function ProductGallery({ mainImage, galleryImages, productName }: Props) {
-  // Tüm görseller sırayla: önce main, sonra galeri (main ile birebir aynı olanları atla, tek kez göster)
+  // Tüm görseller sırayla: önce main, sonra galeri (aynı URL'yi tek kez göster)
   const seen = new Set<string>()
   const allImages: string[] = []
   for (const img of [mainImage, ...galleryImages]) {

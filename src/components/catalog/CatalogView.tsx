@@ -4,13 +4,7 @@ import { useMemo, useState } from "react";
 import { CATEGORIES } from "@/lib/categories";
 import { ProductCard } from "@/components/ui/ProductCard";
 import type { CatalogProduct } from "@/lib/products";
-
-const sortOptions = [
-  { value: "default", label: "Sıralama seçiniz" },
-  { value: "price-asc", label: "Fiyat (Artan)" },
-  { value: "price-desc", label: "Fiyat (Azalan)" },
-  { value: "name", label: "İsim (A-Z)" },
-] as const;
+import { useI18n } from "@/lib/i18n/context";
 
 export function CatalogView({
   title,
@@ -19,10 +13,20 @@ export function CatalogView({
   title: string;
   products: CatalogProduct[];
 }) {
+  const { t } = useI18n();
   const [filterOpen, setFilterOpen] = useState(false);
   const [min, setMin] = useState("");
   const [max, setMax] = useState("");
-  const [sort, setSort] = useState<(typeof sortOptions)[number]["value"]>("default");
+
+  type SortValue = "default" | "price-asc" | "price-desc" | "name";
+  const [sort, setSort] = useState<SortValue>("default");
+
+  const sortOptions: { value: SortValue; label: string }[] = [
+    { value: "default", label: t.catalog.sort },
+    { value: "price-asc", label: t.catalog.sort_price_asc },
+    { value: "price-desc", label: t.catalog.sort_price_desc },
+    { value: "name", label: t.catalog.sort_name },
+  ];
 
   const filtered = useMemo(() => {
     const minV = min === "" ? undefined : Number(min);
@@ -44,7 +48,7 @@ export function CatalogView({
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
       <h1 className="text-2xl font-bold uppercase tracking-wide text-[var(--accent)] sm:text-3xl">{title}</h1>
-      <p className="mt-1 text-sm text-zinc-600">{filtered.length} ürün</p>
+      <p className="mt-1 text-sm text-zinc-600">{t.catalog.products_count.replace("{n}", String(filtered.length))}</p>
 
       <div className="mt-6 flex flex-col gap-3 border-b border-zinc-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
         <button
@@ -55,13 +59,13 @@ export function CatalogView({
           <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75">
             <path d="M4 6h16M7 12h10M10 18h4" strokeLinecap="round" />
           </svg>
-          Filtreleme
+          {t.catalog.filter}
         </button>
         <label className="w-full sm:w-auto">
-          <span className="sr-only">Sıralama</span>
+          <span className="sr-only">{t.catalog.sort}</span>
           <select
             value={sort}
-            onChange={(e) => setSort(e.target.value as typeof sort)}
+            onChange={(e) => setSort(e.target.value as SortValue)}
             className="h-11 w-full border border-zinc-300 bg-white px-4 text-xs font-bold uppercase tracking-wider text-zinc-900 outline-none transition focus:border-zinc-900 sm:min-w-[220px]"
           >
             {sortOptions.map((o) => (
@@ -76,32 +80,32 @@ export function CatalogView({
       {filterOpen ? (
         <div className="mb-8 grid gap-6 border border-zinc-200 bg-white p-5 sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">Kategoriler</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">{t.catalog.categories}</p>
             <ul className="mt-3 space-y-2">
               {CATEGORIES.map((c) => (
                 <li key={c.slug}>
                   <a href={c.href} className="text-sm text-zinc-700 hover:text-zinc-950">
-                    {c.label}
+                    {(t.category as Record<string, string>)[c.slug] || c.label}
                   </a>
                 </li>
               ))}
             </ul>
           </div>
           <div className="sm:col-span-2">
-            <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">Fiyat aralığı</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">{t.catalog.price_range}</p>
             <div className="mt-3 flex max-w-md gap-2">
               <input
                 value={min}
                 onChange={(e) => setMin(e.target.value)}
                 inputMode="numeric"
-                placeholder="En az"
+                placeholder={t.catalog.min}
                 className="h-10 flex-1 border border-zinc-200 px-3 text-sm outline-none focus:border-zinc-900"
               />
               <input
                 value={max}
                 onChange={(e) => setMax(e.target.value)}
                 inputMode="numeric"
-                placeholder="En çok"
+                placeholder={t.catalog.max}
                 className="h-10 flex-1 border border-zinc-200 px-3 text-sm outline-none focus:border-zinc-900"
               />
             </div>

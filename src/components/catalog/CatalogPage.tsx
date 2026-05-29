@@ -1,8 +1,10 @@
 import { CatalogView } from "@/components/catalog/CatalogView";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import type { CatalogProduct } from "@/lib/products";
+import { getLocale } from "@/lib/i18n/server";
+import { getDict } from "@/lib/i18n/dict";
 
-export function CatalogPage({
+export async function CatalogPage({
   title,
   products,
   breadcrumbParent,
@@ -11,13 +13,16 @@ export function CatalogPage({
   products: CatalogProduct[];
   breadcrumbParent?: { label: string; href: string };
 }) {
+  const locale = await getLocale();
+  const t = getDict(locale);
+
   return (
     <main className="flex-1 bg-[var(--surface)]">
       <div className="border-b border-zinc-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <Breadcrumbs
             items={[
-              { label: "Anasayfa", href: "/" },
+              { label: t.breadcrumb.home, href: "/" },
               ...(breadcrumbParent
                 ? [{ label: breadcrumbParent.label, href: breadcrumbParent.href }]
                 : []),

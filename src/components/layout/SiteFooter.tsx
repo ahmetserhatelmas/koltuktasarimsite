@@ -1,6 +1,16 @@
 import Link from "next/link";
+import { parseSocialLinks } from "@/lib/social";
 import { CONTACT, SITE_NAME } from "@/lib/site-data";
+import { getLocale } from "@/lib/i18n/server";
+import { getDict } from "@/lib/i18n/dict";
 import { createClient } from "@/lib/supabase/server";
+import { SocialFollowBar } from "@/components/layout/SocialFollowBar";
+import {
+  contentPageHref,
+  DEFAULT_CONTENT_PAGES,
+  type Category,
+  type ContentPage,
+} from "@/lib/supabase/types";
 
 function IconHeadset(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -19,68 +29,150 @@ function IconWA(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-const footerCols = [
-  {
-    title: "Kategoriler",
-    links: [
-      ["Konferans Sandalyeleri", "/konferans-sandalyeleri"],
-      ["Konferans Koltukları", "/konferans-koltuklari"],
-      ["Bar Taburesi", "/bar-taburesi"],
-      ["Stadyum", "/stadyum"],
-      ["Projeler", "/#projeler"],
-    ],
-  },
+const FALLBACK_CATEGORY_SLUGS = [
+  ["konferans-sandalyeleri", "/konferans-sandalyeleri"],
+  ["konferans-koltuklari", "/konferans-koltuklari"],
+  ["bar", "/bar-taburesi"],
+  ["stadyum", "/stadyum"],
 ] as const;
 
 export async function SiteFooter() {
-  // Supabase'den güncel iletişim bilgilerini ve harita URL'sini çek
+  const locale = await getLocale()
+  const t = getDict(locale)
+  const f = t.footer
+
   let phone: string = CONTACT.phone;
   let whatsapp: string = CONTACT.whatsapp;
   let email: string = CONTACT.email;
   let address: string = CONTACT.address;
   let mapEmbedUrl = "";
+  let kurumsalPages: ContentPage[] = [];
+  let yasalPages: ContentPage[] = [];
+  let categoryLinks: { label: string; href: string }[] = [];
+  let socialLinks = parseSocialLinks({});
 
   try {
     const supabase = await createClient();
-    const { data } = await supabase.from("settings").select("key, value");
-    if (data) {
-      const map = Object.fromEntries(data.map((s: { key: string; value: string }) => [s.key, s.value]));
+    const [{ data: settings }, { data: pages }, { data: categories }] = await Promise.all([
+      supabase.from("settings").select("key, value"),
+      supabase
+        .from("content_pages")
+        .select("*")
+        .eq("is_active", true)
+        .order("section")
+        .order("sort_order"),
+      supabase
+        .from("categories")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order"),
+    ]);
+
+    if (settings) {
+      const map = Object.fromEntries(settings.map((s: { key: string; value: string }) => [s.key, s.value]));
       phone = map.contact_phone || phone;
       whatsapp = map.contact_whatsapp || whatsapp;
       email = map.contact_email || email;
       address = map.contact_address || address;
       mapEmbedUrl = map.map_embed_url || "";
+      socialLinks = parseSocialLinks(map);
+    }
+
+    if (pages && pages.length > 0) {
+      kurumsalPages = pages.filter((p) => p.section === "kurumsal");
+      yasalPages = pages.filter((p) => p.section === "yasal");
+    }
+
+    if (categories && categories.length > 0) {
+      categoryLinks = (categories as Category[]).map((cat) => {
+        const trans = locale !== "tr" ? (cat.translations as Partial<Record<string, { label?: string }>> | undefined)?.[locale] : undefined
+        const dictLabel = locale !== "tr" ? (t.category as Record<string, string>)[cat.slug] || (t.category as Record<string, string>)[cat.id] : undefined
+        return {
+          label: trans?.label || dictLabel || cat.label,
+          href: cat.route,
+        }
+      });
+      // "Projeler" henüz listede yoksa sona ekle
+      if (!categoryLinks.some((l) => l.href === "/#projeler")) {
+        categoryLinks.push({ label: t.nav.projects, href: "/#projeler" })
+      }
     }
   } catch {
     // Supabase bağlantısı yoksa statik değerlere fallback
   }
 
+  if (kurumsalPages.length === 0) {
+    kurumsalPages = DEFAULT_CONTENT_PAGES.filter((p) => p.section === "kurumsal");
+  }
+  if (yasalPages.length === 0) {
+    yasalPages = DEFAULT_CONTENT_PAGES.filter((p) => p.section === "yasal");
+  }
+  if (categoryLinks.length === 0) {
+    categoryLinks = [
+      ...FALLBACK_CATEGORY_SLUGS.map(([slug, href]) => ({
+        label: (t.category as Record<string, string>)[slug] || slug,
+        href,
+      })),
+      { label: t.nav.projects, href: "/#projeler" },
+    ];
+  }
+
   const isValidMap = mapEmbedUrl && (mapEmbedUrl.includes("/maps/embed") || mapEmbedUrl.includes("output=embed"))
+
+  function renderPageLinks(items: ContentPage[]) {
+    return (
+      <ul className="mt-4 space-y-2">
+        {items.map((page) => {
+          const dictTitle = (t.pages as Record<string, string>)[page.slug]
+          return (
+            <li key={page.slug}>
+              <Link
+                href={contentPageHref(page)}
+                className="text-sm text-zinc-600 transition hover:text-zinc-900"
+              >
+                {dictTitle || page.title}
+              </Link>
+            </li>
+          )
+        })}
+      </ul>
+    );
+  }
 
   return (
     <footer className="mt-auto border-t border-zinc-200 bg-zinc-50">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-7">
 
           {/* Kategoriler */}
-          {footerCols.map((col) => (
-            <div key={col.title} className="lg:col-span-1">
-              <p className="text-sm font-semibold text-zinc-900">{col.title}</p>
-              <ul className="mt-4 space-y-2">
-                {col.links.map(([label, href]) => (
-                  <li key={label}>
-                    <Link href={href} className="text-sm text-zinc-600 transition hover:text-zinc-900">
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div className="lg:col-span-1">
+            <p className="text-sm font-semibold text-zinc-900">{f.categories}</p>
+            <ul className="mt-4 space-y-2">
+              {categoryLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-sm text-zinc-600 transition hover:text-zinc-900">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Kurumsal */}
+          <div className="lg:col-span-1">
+            <p className="text-sm font-semibold text-zinc-900">{f.corporate}</p>
+            {renderPageLinks(kurumsalPages)}
+          </div>
+
+          {/* Yasal */}
+          <div className="lg:col-span-1">
+            <p className="text-sm font-semibold text-zinc-900">{f.legal}</p>
+            {renderPageLinks(yasalPages)}
+          </div>
 
           {/* Harita */}
-          <div className="lg:col-span-2">
-            <p className="mb-3 text-sm font-semibold text-zinc-900">Konum</p>
+          <div className="sm:col-span-2 lg:col-span-2">
+            <p className="mb-3 text-sm font-semibold text-zinc-900">{f.location}</p>
             {isValidMap ? (
               <div className="overflow-hidden rounded border border-zinc-200">
                 <iframe
@@ -93,7 +185,7 @@ export async function SiteFooter() {
               </div>
             ) : (
               <div className="flex h-56 items-center justify-center rounded border border-dashed border-zinc-200 text-xs text-zinc-400">
-                Harita eklenmemiş
+                {f.no_map}
               </div>
             )}
             {address.trim() && (
@@ -103,12 +195,12 @@ export async function SiteFooter() {
 
           {/* İletişim */}
           <div className="sm:col-span-2 lg:col-span-2">
-            <p className="text-sm font-semibold text-zinc-900">İletişim</p>
+            <p className="text-sm font-semibold text-zinc-900">{f.contact}</p>
             <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2.5 rounded-xl border border-zinc-200 bg-white px-3 py-2.5">
                 <IconHeadset className="h-5 w-5 shrink-0 text-zinc-600" />
                 <div>
-                  <p className="text-xs font-semibold text-zinc-900">Müşteri Hattı</p>
+                  <p className="text-xs font-semibold text-zinc-900">{f.customer_line}</p>
                   <p className="text-xs text-zinc-600">{phone.trim() || "—"}</p>
                 </div>
               </div>
@@ -121,7 +213,7 @@ export async function SiteFooter() {
               </div>
               {email.trim() && (
                 <div className="rounded-xl border border-zinc-200 bg-white px-3 py-2.5">
-                  <p className="text-xs font-semibold text-zinc-900">E-posta</p>
+                  <p className="text-xs font-semibold text-zinc-900">{t.contact.email}</p>
                   <p className="text-xs text-zinc-600">{email}</p>
                 </div>
               )}
@@ -129,11 +221,13 @@ export async function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-zinc-200 pt-8 text-center text-xs text-zinc-500 sm:flex-row sm:text-left">
+        <SocialFollowBar links={socialLinks} followText={f.social_follow} />
+
+        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-zinc-200 pt-8 text-center text-xs text-zinc-500 sm:flex-row sm:text-left">
           <p>
-            Tüm hakları saklıdır © {new Date().getFullYear()} — {SITE_NAME}
+            {f.rights} © {new Date().getFullYear()} — {SITE_NAME}
           </p>
-          <p className="text-zinc-400">Tanıtım sitesi</p>
+          <p className="text-zinc-400">{f.promo}</p>
         </div>
       </div>
     </footer>

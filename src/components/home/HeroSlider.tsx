@@ -4,6 +4,7 @@ import Image from "next/image"
 import useEmblaCarousel from "embla-carousel-react"
 import { useCallback, useEffect, useState } from "react"
 import type { Slider } from "@/lib/supabase/types"
+import { useI18n } from "@/lib/i18n/context"
 
 interface Props {
   slides: Slider[]
@@ -12,6 +13,18 @@ interface Props {
 export function HeroSlider({ slides }: Props) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 22 })
   const [selected, setSelected] = useState(0)
+  const { locale } = useI18n()
+
+  function slideText(s: Slider) {
+    if (locale === "tr") return { accent: s.accent, italic: s.headline_italic, bold: s.headline_bold, sub: s.sub_text }
+    const tr = (s.translations as Partial<Record<string, { accent?: string; headline_italic?: string; headline_bold?: string; sub_text?: string }>> | undefined)?.[locale]
+    return {
+      accent: tr?.accent || s.accent,
+      italic: tr?.headline_italic || s.headline_italic,
+      bold: tr?.headline_bold || s.headline_bold,
+      sub: tr?.sub_text || s.sub_text,
+    }
+  }
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return
@@ -39,42 +52,45 @@ export function HeroSlider({ slides }: Props) {
     <section className="relative bg-zinc-900">
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex">
-          {slides.map((s, i) => (
-            <div key={s.id} className="relative min-w-0 flex-[0_0_100%]">
-              <div className="relative h-[52vw] min-h-[260px] w-full sm:h-[48vw] sm:min-h-[360px] md:h-[44vw] lg:h-[38vw] xl:h-[34vw] xl:max-h-[680px]">
-                <Image
-                  src={s.image_url}
-                  alt={s.headline_bold ?? `Slayt ${i + 1}`}
-                  fill
-                  priority={i === 0}
-                  className="object-cover object-center"
-                  sizes="100vw"
-                  unoptimized={s.image_url.startsWith("http")}
-                />
-                <div className="absolute inset-0 bg-gradient-to-l from-black/50 via-black/20 to-transparent" />
-                <div className="absolute inset-y-0 right-0 flex w-full max-w-lg flex-col justify-center px-6 text-right sm:px-12 lg:px-16">
-                  {s.accent && (
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/90">
-                      {s.accent}
-                    </p>
-                  )}
-                  {s.headline_italic && (
-                    <p className="mt-2 font-serif text-3xl italic text-white sm:text-4xl lg:text-5xl">
-                      {s.headline_italic}
-                    </p>
-                  )}
-                  {s.headline_bold && (
-                    <p className="mt-1 text-2xl font-bold uppercase tracking-wide text-white sm:text-3xl lg:text-4xl">
-                      {s.headline_bold}
-                    </p>
-                  )}
-                  {s.sub_text && (
-                    <p className="mt-4 text-sm text-white/85">{s.sub_text}</p>
-                  )}
+          {slides.map((s, i) => {
+            const txt = slideText(s)
+            return (
+              <div key={s.id} className="relative min-w-0 flex-[0_0_100%]">
+                <div className="relative h-[52vw] min-h-[260px] w-full sm:h-[48vw] sm:min-h-[360px] md:h-[44vw] lg:h-[38vw] xl:h-[34vw] xl:max-h-[680px]">
+                  <Image
+                    src={s.image_url}
+                    alt={txt.bold ?? `Slayt ${i + 1}`}
+                    fill
+                    priority={i === 0}
+                    className="object-cover object-center"
+                    sizes="100vw"
+                    unoptimized={s.image_url.startsWith("http")}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-l from-black/50 via-black/20 to-transparent" />
+                  <div className="absolute inset-y-0 right-0 flex w-full max-w-lg flex-col justify-center px-6 text-right sm:px-12 lg:px-16">
+                    {txt.accent && (
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/90">
+                        {txt.accent}
+                      </p>
+                    )}
+                    {txt.italic && (
+                      <p className="mt-2 font-serif text-3xl italic text-white sm:text-4xl lg:text-5xl">
+                        {txt.italic}
+                      </p>
+                    )}
+                    {txt.bold && (
+                      <p className="mt-1 text-2xl font-bold uppercase tracking-wide text-white sm:text-3xl lg:text-4xl">
+                        {txt.bold}
+                      </p>
+                    )}
+                    {txt.sub && (
+                      <p className="mt-4 text-sm text-white/85">{txt.sub}</p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 

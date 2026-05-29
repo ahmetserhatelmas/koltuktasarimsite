@@ -5,6 +5,7 @@ import Link from "next/link"
 import useEmblaCarousel from "embla-carousel-react"
 import { useCallback, useEffect, useState } from "react"
 import type { Category } from "@/lib/supabase/types"
+import { useI18n } from "@/lib/i18n/context"
 import { SectionHeading } from "@/components/ui/SectionHeading"
 
 function IconChevron(props: React.SVGProps<SVGSVGElement>) {
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export function CategoryShowcase({ categories }: Props) {
+  const { t, locale } = useI18n()
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     loop: false,
@@ -51,8 +53,8 @@ export function CategoryShowcase({ categories }: Props) {
     <section id="kategoriler" className="scroll-mt-28 bg-[var(--surface)] py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          title="Öne çıkan kategoriler"
-          subtitle="Koltuk Dünyası klasörlerinize göre ayrılmış vitrin"
+          title={t.home.categories_title}
+          subtitle={t.home.categories_sub}
         />
 
         <div className="relative mt-8">
@@ -96,14 +98,18 @@ export function CategoryShowcase({ categories }: Props) {
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
-                      <p className="text-lg font-bold text-white sm:text-xl">
-                        {cat.label}
-                      </p>
-                      {cat.tagline && (
-                        <p className="mt-1 text-xs text-white/85 sm:text-sm">
-                          {cat.tagline}
-                        </p>
-                      )}
+                      {(() => {
+                        const tr = locale !== "tr" ? (cat.translations as Partial<Record<string, { label?: string; tagline?: string }>> | undefined)?.[locale] : undefined
+                        const dictLabel = locale !== "tr" ? (t.category as Record<string, string>)[cat.slug] || (t.category as Record<string, string>)[cat.id] : undefined
+                        const label = tr?.label || dictLabel || cat.label
+                        const tagline = tr?.tagline || cat.tagline
+                        return (
+                          <>
+                            <p className="text-lg font-bold text-white sm:text-xl">{label}</p>
+                            {tagline && <p className="mt-1 text-xs text-white/85 sm:text-sm">{tagline}</p>}
+                          </>
+                        )
+                      })()}
                     </div>
                   </div>
                 </Link>

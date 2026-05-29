@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS public.products (
   description_bullets JSONB DEFAULT '[]'::jsonb,
   description_footer TEXT,
   is_active BOOLEAN DEFAULT TRUE,
+  show_certificate BOOLEAN DEFAULT TRUE NOT NULL,
+  certificate_url TEXT,
   sort_order INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -47,6 +49,7 @@ CREATE TABLE IF NOT EXISTS public.categories (
   route TEXT NOT NULL,
   tagline TEXT,
   is_featured BOOLEAN DEFAULT TRUE,
+  is_active BOOLEAN DEFAULT TRUE NOT NULL,
   sort_order INTEGER DEFAULT 0
 );
 

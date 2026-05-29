@@ -3,16 +3,24 @@
 import Link from "next/link"
 import { useI18n } from "@/lib/i18n/context"
 
-export function BrandStory() {
+interface Props {
+  title?: string
+  text?: string
+}
+
+export function BrandStory({ title, text }: Props) {
   const { t } = useI18n()
+  const displayTitle = title || t.home.brand_title
+  const displayText  = text  || t.home.brand_text
+
   return (
     <section className="border-t border-zinc-100 bg-white py-12 sm:py-16">
       <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
         <h2 className="text-xl font-bold uppercase tracking-wide text-[var(--accent)] sm:text-2xl">
-          {t.home.brand_title}
+          {displayTitle}
         </h2>
         <p className="mt-6 text-sm leading-relaxed text-zinc-600 sm:text-base">
-          {t.home.brand_text}
+          {displayText}
         </p>
         <Link
           href="/iletisim"

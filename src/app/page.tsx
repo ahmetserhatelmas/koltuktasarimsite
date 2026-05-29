@@ -22,31 +22,25 @@ export default async function HomePage() {
     { data: categoriesRaw },
     { data: featuredRaw },
     { data: trustRaw },
+    { data: settingsRaw },
   ] = await Promise.all([
-    supabase
-      .from("sliders")
-      .select("*")
-      .eq("is_active", true)
-      .order("sort_order"),
-    supabase
-      .from("categories")
-      .select("*")
-      .eq("is_featured", true)
-      .eq("is_active", true)
-      .order("sort_order"),
-    supabase
-      .from("featured_products")
-      .select("*, products(*)")
-      .order("sort_order"),
-    supabase
-      .from("trust_items")
-      .select("*")
-      .order("sort_order"),
+    supabase.from("sliders").select("*").eq("is_active", true).order("sort_order"),
+    supabase.from("categories").select("*").eq("is_featured", true).eq("is_active", true).order("sort_order"),
+    supabase.from("featured_products").select("*, products(*)").order("sort_order"),
+    supabase.from("trust_items").select("*").order("sort_order"),
+    supabase.from("settings").select("key, value").in("key", [
+      "brand_title", "brand_text",
+      `brand_title_${locale}`, `brand_text_${locale}`,
+    ]),
   ])
 
   const sliders: Slider[] = slidersRaw ?? []
   const categories: Category[] = categoriesRaw ?? []
   const trustItems: TrustItem[] = (trustRaw ?? []) as TrustItem[]
+
+  const settingsMap = Object.fromEntries((settingsRaw ?? []).map((s) => [s.key, s.value]))
+  const brandTitle = settingsMap[`brand_title_${locale}`] || settingsMap["brand_title"] || t.home.brand_title
+  const brandText  = settingsMap[`brand_text_${locale}`]  || settingsMap["brand_text"]  || t.home.brand_text
 
   const featuredProducts: CatalogProduct[] =
     (featuredRaw ?? [])
@@ -73,7 +67,7 @@ export default async function HomePage() {
         products={featuredProducts}
       />
       <ProjectsStrip />
-      <BrandStory />
+      <BrandStory title={brandTitle} text={brandText} />
     </main>
   )
 }

@@ -5,7 +5,8 @@ import Link from "next/link";
 import { discountPercent, formatTry } from "@/lib/format";
 import { productDetailHref } from "@/lib/product-lookup";
 import { isQuoteOnly, type CatalogProduct } from "@/lib/products";
-import { whatsappQuoteUrl } from "@/lib/site-data";
+import { useContact } from "@/lib/contact-context";
+import { whatsappQuoteUrl } from "@/lib/contact";
 import { useI18n } from "@/lib/i18n/context";
 
 export function ProductCard({
@@ -16,6 +17,7 @@ export function ProductCard({
   className?: string;
 }) {
   const { locale, t } = useI18n()
+  const { whatsapp } = useContact()
   const quote = isQuoteOnly(product);
   const pct = quote ? 0 : discountPercent(product.oldPrice, product.price);
 
@@ -59,7 +61,7 @@ export function ProductCard({
           </p>
         </Link>
         <a
-          href={whatsappQuoteUrl(displayName)}
+          href={whatsappQuoteUrl(displayName, whatsapp)}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-3 flex h-10 w-full items-center justify-center gap-2 bg-[#25D366] text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#1ebe5d]"

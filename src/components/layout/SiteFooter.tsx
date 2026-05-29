@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { parseSocialLinks } from "@/lib/social";
+import { formatWhatsAppDisplay, whatsappHref } from "@/lib/contact";
 import { CONTACT, SITE_NAME } from "@/lib/site-data";
 import { getLocale } from "@/lib/i18n/server";
 import { getDict } from "@/lib/i18n/dict";
@@ -204,13 +205,28 @@ export async function SiteFooter() {
                   <p className="text-xs text-zinc-600">{phone.trim() || "—"}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2.5 rounded-xl border border-zinc-200 bg-white px-3 py-2.5">
-                <IconWA className="h-5 w-5 shrink-0 text-emerald-600" />
-                <div>
-                  <p className="text-xs font-semibold text-zinc-900">WhatsApp</p>
-                  <p className="text-xs text-zinc-600">{whatsapp.trim() || "—"}</p>
+              {whatsapp.trim() ? (
+                <a
+                  href={whatsappHref(whatsapp)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 rounded-xl border border-zinc-200 bg-white px-3 py-2.5 transition hover:border-emerald-300 hover:bg-emerald-50/50"
+                >
+                  <IconWA className="h-5 w-5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="text-xs font-semibold text-zinc-900">WhatsApp</p>
+                    <p className="text-xs text-zinc-600">{formatWhatsAppDisplay(whatsapp)}</p>
+                  </div>
+                </a>
+              ) : (
+                <div className="flex items-center gap-2.5 rounded-xl border border-zinc-200 bg-white px-3 py-2.5">
+                  <IconWA className="h-5 w-5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="text-xs font-semibold text-zinc-900">WhatsApp</p>
+                    <p className="text-xs text-zinc-600">—</p>
+                  </div>
                 </div>
-              </div>
+              )}
               {email.trim() && (
                 <div className="rounded-xl border border-zinc-200 bg-white px-3 py-2.5">
                   <p className="text-xs font-semibold text-zinc-900">{t.contact.email}</p>

@@ -4,7 +4,32 @@ import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { NavItem } from "@/lib/supabase/types"
 
+type QuickOption = { label: string; href: string; group: string }
+
 const EMPTY = { label: "", href: "", sort_order: 0, is_active: true }
+
+/** İç linkler / ile, dış linkler http(s):// ile başlamalı */
+function normalizeNavHref(href: string): string {
+  const trimmed = href.trim()
+  if (!trimmed) return trimmed
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  if (trimmed.startsWith("/")) return trimmed
+  if (trimmed.startsWith("#")) return `/${trimmed}`
+  return `/${trimmed}`
+}
+
+function validateNavHref(href: string): string | null {
+  const normalized = normalizeNavHref(href)
+  if (!normalized) return "Link zorunlu."
+  if (/^https?:\/\//i.test(normalized)) return null
+  if (!normalized.startsWith("/")) {
+    return "Link / ile başlamalı (örn. /konferans-sandalyeleri) veya https:// ile dış site."
+  }
+  return null
+}
+
+const LINK_HINT =
+  "Site içi: /konferans-sandalyeleri, /sayfa/hakkimizda, /#projeler, /iletisim — Dış site: https://..."
 
 export default function AdminNavPage() {
   const [items, setItems] = useState<NavItem[]>([])
@@ -13,6 +38,25 @@ export default function AdminNavPage() {
   const [error, setError] = useState("")
   const [adding, setAdding] = useState(false)
   const [newItem, setNewItem] = useState({ ...EMPTY })
+  const [quickOptions, setQuickOptions] = useState<QuickOption[]>([])
+
+  // Kategoriler + sayfalar çek
+  useEffect(() => {
+    const supabase = createClient()
+    Promise.all([
+      supabase.from("categories").select("label, slug, route").eq("is_active", true).order("sort_order"),
+      supabase.from("content_pages").select("title, slug, link_url").eq("is_active", true).order("section").order("sort_order"),
+    ]).then(([{ data: cats }, { data: pages }]) => {
+      const opts: QuickOption[] = []
+      for (const c of (cats ?? [])) {
+        opts.push({ label: c.label, href: c.route || `/${c.slug}`, group: "Kategori" })
+      }
+      for (const p of (pages ?? [])) {
+        opts.push({ label: p.title, href: p.link_url || `/sayfa/${p.slug}`, group: "Sayfa" })
+      }
+      setQuickOptions(opts)
+    })
+  }, [])
 
   async function load() {
     setLoading(true)
@@ -28,14 +72,18 @@ export default function AdminNavPage() {
   useEffect(() => { void load() }, [])
 
   async function handleSave(item: NavItem) {
+    const hrefErr = validateNavHref(item.href)
+    if (hrefErr) { setError(hrefErr); return }
+
     setSaving(item.id)
     setError("")
+    const href = normalizeNavHref(item.href)
     const supabase = createClient()
     const { error: err } = await supabase
       .from("nav_items")
       .update({
         label: item.label.trim(),
-        href: item.href.trim(),
+        href,
         sort_order: item.sort_order,
         is_active: item.is_active,
       })
@@ -57,13 +105,15 @@ export default function AdminNavPage() {
 
   async function handleAdd() {
     if (!newItem.label.trim()) { setError("İsim zorunlu."); return }
-    if (!newItem.href.trim()) { setError("Link zorunlu."); return }
+    const hrefErr = validateNavHref(newItem.href)
+    if (hrefErr) { setError(hrefErr); return }
     setSaving("new")
     setError("")
+    const href = normalizeNavHref(newItem.href)
     const supabase = createClient()
     const { error: err } = await supabase.from("nav_items").insert({
       label: newItem.label.trim(),
-      href: newItem.href.trim(),
+      href,
       sort_order: newItem.sort_order || items.length + 1,
       is_active: newItem.is_active,
     })
@@ -104,6 +154,37 @@ export default function AdminNavPage() {
       {adding && (
         <div className="mb-6 border border-zinc-300 bg-white p-5">
           <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-zinc-500">Yeni Menü Öğesi</h2>
+
+          {/* Hızlı Seç */}
+          {quickOptions.length > 0 && (
+            <div className="mb-4">
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                Kategori veya Sayfadan Hızlı Seç
+              </label>
+              <select
+                defaultValue=""
+                onChange={(e) => {
+                  const opt = quickOptions.find((o) => o.href === e.target.value)
+                  if (opt) setNewItem((p) => ({ ...p, label: opt.label, href: opt.href }))
+                }}
+                className="h-10 w-full border border-zinc-200 bg-white px-3 text-sm outline-none focus:border-zinc-900"
+              >
+                <option value="" disabled>— Seçin —</option>
+                <optgroup label="Kategoriler">
+                  {quickOptions.filter((o) => o.group === "Kategori").map((o) => (
+                    <option key={o.href} value={o.href}>{o.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Sayfalar">
+                  {quickOptions.filter((o) => o.group === "Sayfa").map((o) => (
+                    <option key={o.href} value={o.href}>{o.label}</option>
+                  ))}
+                </optgroup>
+              </select>
+              <p className="mt-1 text-xs text-zinc-400">Seçince isim ve link alanları otomatik dolar, istersen düzenleyebilirsin.</p>
+            </div>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
@@ -128,6 +209,7 @@ export default function AdminNavPage() {
                 placeholder="/konferans-sandalyeleri"
                 className="h-10 w-full border border-zinc-200 px-3 text-sm outline-none focus:border-zinc-900"
               />
+              <p className="mt-1 text-xs text-zinc-400">{LINK_HINT}</p>
             </div>
             <div>
               <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
@@ -251,7 +333,7 @@ export default function AdminNavPage() {
             </tbody>
           </table>
           <p className="border-t border-zinc-100 px-4 py-3 text-xs text-zinc-400">
-            💡 Sıra değiştirmek için sıra numarasını düzenleyip &quot;Kaydet&quot; butonuna tıklayın.
+            💡 Link mutlaka gerçek bir sayfa olmalı. Yeni içerik için önce <strong>Sayfalar</strong> bölümünden sayfa oluşturun, link olarak <code className="bg-zinc-100 px-1">/sayfa/slug</code> yazın. {LINK_HINT}
           </p>
         </div>
       )}

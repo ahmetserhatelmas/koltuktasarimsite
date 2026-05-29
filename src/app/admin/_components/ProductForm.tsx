@@ -1,10 +1,10 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import type { Product, ProductCategory, ProductColor, ProductSpec } from "@/lib/supabase/types"
+import type { Product, ProductColor, ProductSpec } from "@/lib/supabase/types"
 import { AllImagesEditor } from "./AllImagesEditor"
 import { SpecsEditor } from "./SpecsEditor"
 import { BulletsEditor } from "./BulletsEditor"
@@ -13,7 +13,9 @@ import { ImageUpload } from "./ImageUpload"
 
 const DEFAULT_CERTIFICATE_URL = "/brand/certificate.png"
 
-const CATEGORIES: { value: ProductCategory; label: string }[] = [
+type CategoryOption = { value: string; label: string }
+
+const FALLBACK_CATEGORIES: CategoryOption[] = [
   { value: "bar", label: "Bar Taburesi" },
   { value: "konferans-sandalyeleri", label: "Konferans Sandalyeleri" },
   { value: "konferans-koltuklari", label: "Konferans Koltukları" },
@@ -23,7 +25,7 @@ const CATEGORIES: { value: ProductCategory; label: string }[] = [
 type FormData = {
   id: string
   name: string
-  category: ProductCategory
+  category: string
   image_url: string
   gallery_images: string[]
   colors: ProductColor[]
@@ -51,6 +53,18 @@ export function ProductForm({ initial, mode }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [categories, setCategories] = useState<CategoryOption[]>(FALLBACK_CATEGORIES)
+
+  // DB'den kategorileri çek
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.from("categories").select("id, label, slug").eq("is_active", true).order("sort_order")
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setCategories(data.map((c) => ({ value: c.slug ?? c.id, label: c.label })))
+        }
+      })
+  }, [])
 
   const [translating, setTranslating] = useState(false)
   const [transStatus, setTransStatus] = useState("")
@@ -207,10 +221,10 @@ export function ProductForm({ initial, mode }: Props) {
             </label>
             <select
               value={form.category}
-              onChange={(e) => set("category", e.target.value as ProductCategory)}
+              onChange={(e) => set("category", e.target.value)}
               className="h-10 w-full border border-zinc-200 px-3 text-sm outline-none focus:border-zinc-900 bg-white"
             >
-              {CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <option key={c.value} value={c.value}>
                   {c.label}
                 </option>

@@ -1,10 +1,18 @@
-const WA_HREF = "https://wa.me/905438412550";
+"use client"
+
+import { useContact } from "@/lib/contact-context"
+import { whatsappHref } from "@/lib/contact"
 
 export function FloatingSocial() {
+  const { whatsapp } = useContact()
+  const href = whatsappHref(whatsapp)
+
+  if (!whatsapp.trim()) return null
+
   return (
     <div className="pointer-events-none fixed bottom-24 right-4 z-40 md:bottom-8 md:right-6">
       <a
-        href={WA_HREF}
+        href={href}
         target="_blank"
         rel="noopener noreferrer"
         className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-emerald-600/20 transition hover:scale-105 hover:shadow-xl active:scale-95"

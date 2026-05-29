@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { ContactForm } from "@/components/forms/ContactForm"
 import { createClient } from "@/lib/supabase/server"
+import { formatWhatsAppDisplay, whatsappHref } from "@/lib/contact"
 import { SITE_NAME } from "@/lib/site-data"
 
 export const dynamic = "force-dynamic"
@@ -106,8 +107,8 @@ export default async function ContactPage() {
                     </svg>
                   }
                   label="WhatsApp"
-                  value={contact.whatsapp ? `+${contact.whatsapp}` : ""}
-                  href={`https://wa.me/${contact.whatsapp}`}
+                  value={contact.whatsapp ? formatWhatsAppDisplay(contact.whatsapp) : ""}
+                  href={contact.whatsapp ? whatsappHref(contact.whatsapp) : undefined}
                 />
                 <ContactRow
                   icon={

@@ -9,7 +9,9 @@ import { getLocale } from "@/lib/i18n/server"
 import { getDict } from "@/lib/i18n/dict"
 import { autoTranslateProduct, type ProductTranslationResult } from "@/lib/i18n/translate"
 import { createClient } from "@/lib/supabase/server"
-import { SITE_NAME, whatsappQuoteUrl } from "@/lib/site-data"
+import { getContactWhatsApp } from "@/lib/contact-server"
+import { whatsappQuoteUrl } from "@/lib/contact"
+import { SITE_NAME } from "@/lib/site-data"
 import { CATEGORY_ROUTES } from "@/lib/supabase/types"
 
 const FALLBACK_CERTIFICATE_URL = "/brand/certificate.png"
@@ -41,9 +43,10 @@ export default async function ProductDetailPage({ params }: Props) {
   const locale = await getLocale()
   const t = getDict(locale)
 
-  const [{ data: product }, { data: settings }] = await Promise.all([
+  const [{ data: product }, { data: settings }, whatsapp] = await Promise.all([
     supabase.from("products").select("*").eq("id", id).eq("is_active", true).single(),
     supabase.from("settings").select("key, value").eq("key", "default_certificate_url").single(),
+    getContactWhatsApp(),
   ])
 
   if (!product) notFound()
@@ -176,7 +179,7 @@ export default async function ProductDetailPage({ params }: Props) {
             </div>
 
             <a
-              href={whatsappQuoteUrl(displayName)}
+              href={whatsappQuoteUrl(displayName, whatsapp)}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-8 inline-flex h-12 w-full max-w-sm items-center justify-center gap-2.5 bg-[#25D366] text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#1ebe5d] sm:w-auto sm:px-10"

@@ -7,13 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import type { Product, ProductCategory } from "@/lib/supabase/types"
 import { CATEGORY_LABELS } from "@/lib/supabase/types"
 
-const CATEGORIES: { value: ProductCategory | "all"; label: string }[] = [
-  { value: "all", label: "Tümü" },
-  { value: "bar", label: "Bar Taburesi" },
-  { value: "konferans-sandalyeleri", label: "Konferans Sandalyeleri" },
-  { value: "konferans-koltuklari", label: "Konferans Koltukları" },
-  { value: "stadyum", label: "Stadyum" },
-]
+type CategoryTab = { value: string; label: string }
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -21,6 +15,22 @@ export default function AdminProductsPage() {
   const [filter, setFilter] = useState<ProductCategory | "all">("all")
   const [search, setSearch] = useState("")
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [categories, setCategories] = useState<CategoryTab[]>([{ value: "all", label: "Tümü" }])
+
+  async function loadCategories() {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from("categories")
+      .select("slug, label")
+      .eq("is_active", true)
+      .order("sort_order")
+    if (data && data.length > 0) {
+      setCategories([
+        { value: "all", label: "Tümü" },
+        ...data.map((c) => ({ value: c.slug, label: c.label })),
+      ])
+    }
+  }
 
   async function load() {
     setLoading(true)
@@ -38,6 +48,11 @@ export default function AdminProductsPage() {
     setProducts(data ?? [])
     setLoading(false)
   }
+
+  useEffect(() => {
+    void loadCategories()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -85,7 +100,7 @@ export default function AdminProductsPage() {
       {/* Filters */}
       <div className="mb-4 flex flex-wrap gap-3">
         <div className="flex gap-1">
-          {CATEGORIES.map((c) => (
+          {categories.map((c) => (
             <button
               key={c.value}
               type="button"

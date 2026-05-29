@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { whatsappQuoteUrl } from "@/lib/site-data";
+import { useContact } from "@/lib/contact-context";
+import { whatsappQuoteUrl } from "@/lib/contact";
 import { useI18n } from "@/lib/i18n/context";
 
 const projectImages = Array.from({ length: 11 }, (_, i) => `/projeler/proje-${i + 1}.jpeg`);
@@ -12,6 +13,7 @@ const projectImages = Array.from({ length: 11 }, (_, i) => `/projeler/proje-${i 
 export function ProjectsStrip() {
   const [lightbox, setLightbox] = useState<number | null>(null);
   const { t } = useI18n();
+  const { whatsapp } = useContact();
 
   const close = useCallback(() => setLightbox(null), []);
 
@@ -80,7 +82,7 @@ export function ProjectsStrip() {
               {t.home.project_quote}
             </Link>
             <a
-              href={whatsappQuoteUrl()}
+              href={whatsappQuoteUrl(undefined, whatsapp)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex h-11 items-center gap-2 bg-[#25D366] px-6 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-[#1ebe5d]"

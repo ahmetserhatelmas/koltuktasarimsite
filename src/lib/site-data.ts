@@ -8,14 +8,7 @@ export const CONTACT = {
   address: "",
 } as const;
 
-/** Ürün adıyla birlikte WhatsApp teklif linki oluşturur */
-export function whatsappQuoteUrl(productName?: string): string {
-  const number = CONTACT.whatsapp.replace(/\D/g, "")
-  const message = productName
-    ? `Merhaba, "${productName}" ürünü hakkında fiyat teklifi almak istiyorum.`
-    : "Merhaba, ürünleriniz hakkında bilgi almak istiyorum."
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`
-}
+export { whatsappQuoteUrl } from "@/lib/contact"
 
 export const NAV_MAIN = [
   { href: "/konferans-sandalyeleri", label: "Konferans Sandalyeleri" },

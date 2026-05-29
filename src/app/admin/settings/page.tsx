@@ -65,6 +65,24 @@ export default function AdminSettingsPage() {
         merged.push({ key, value: "", label: transLabels[key] })
       }
     }
+
+    // Brand Story key'leri yoksa placeholder ekle
+    const brandKeys: Record<string, string> = {
+      brand_title: "Marka Başlığı (TR)",
+      brand_text: "Marka Metni (TR)",
+      brand_title_en: "Marka Başlığı (EN)",
+      brand_text_en: "Marka Metni (EN)",
+      brand_title_ru: "Marka Başlığı (RU)",
+      brand_text_ru: "Marka Metni (RU)",
+      brand_title_ar: "Marka Başlığı (AR)",
+      brand_text_ar: "Marka Metni (AR)",
+    }
+    for (const [key, label] of Object.entries(brandKeys)) {
+      if (!existingKeys.has(key)) {
+        merged.push({ key, value: "", label })
+      }
+    }
+
     setSettings(merged)
     setLoading(false)
   }
@@ -142,7 +160,19 @@ export default function AdminSettingsPage() {
       })),
     ])
 
-    const results = await Promise.all([...updates, socialUpsert, announcementUpsert])
+    const brandStoryKeys = ["brand_title", "brand_text", "brand_title_en", "brand_text_en", "brand_title_ru", "brand_text_ru", "brand_title_ar", "brand_text_ar"]
+    const brandUpsert = supabase.from("settings").upsert(
+      settings
+        .filter((s) => brandStoryKeys.includes(s.key))
+        .map((s) => ({
+          key: s.key,
+          value: s.value,
+          label: s.label,
+          updated_at: new Date().toISOString(),
+        }))
+    )
+
+    const results = await Promise.all([...updates, socialUpsert, announcementUpsert, brandUpsert])
     const failed = results.find((r) => r.error)
 
     if (failed?.error) {
@@ -197,6 +227,46 @@ export default function AdminSettingsPage() {
         })
       )
       setTransStatus("✓ Duyurular çevrildi (EN, RU, AR)")
+    } catch {
+      setTransStatus("✗ Çeviri başarısız")
+    } finally {
+      setTranslating(false)
+    }
+  }
+
+  async function handleTranslateBrandStory() {
+    const titleTr = settings.find((s) => s.key === "brand_title")?.value ?? ""
+    const textTr  = settings.find((s) => s.key === "brand_text")?.value ?? ""
+    if (!titleTr && !textTr) return
+    setTranslating(true)
+    setTransStatus("Brand Story çeviriliyor...")
+    try {
+      const langs = [
+        { code: "en", titleKey: "brand_title_en", textKey: "brand_text_en" },
+        { code: "ru", titleKey: "brand_title_ru", textKey: "brand_text_ru" },
+        { code: "ar", titleKey: "brand_title_ar", textKey: "brand_text_ar" },
+      ]
+      for (const lang of langs) {
+        const res = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: titleTr,
+            description_intro: textTr,
+            description_footer: "",
+            description_bullets: [],
+            description_specs: [],
+          }),
+        })
+        if (!res.ok) continue
+        const data = await res.json()
+        const tr = data.translations?.[lang.code]
+        if (tr) {
+          if (tr.name)              updateValue(lang.titleKey, tr.name)
+          if (tr.description_intro) updateValue(lang.textKey,  tr.description_intro)
+        }
+      }
+      setTransStatus("✓ Brand Story çevrildi (EN, RU, AR)")
     } catch {
       setTransStatus("✗ Çeviri başarısız")
     } finally {
@@ -285,6 +355,70 @@ export default function AdminSettingsPage() {
             })}
           </div>
 
+          {/* Brand Story */}
+          <div className="border border-zinc-200 bg-white p-6">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                  Ana Sayfa Tanıtım Yazısı
+                </h2>
+                <p className="mt-1 text-xs text-zinc-400">
+                  Ana sayfanın alt kısmındaki başlık ve açıklama metni. TR girdikten sonra otomatik çevirin.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleTranslateBrandStory}
+                disabled={translating}
+                className="h-9 shrink-0 border border-blue-300 bg-blue-50 px-4 text-xs font-semibold text-blue-700 hover:bg-blue-100 disabled:opacity-50"
+              >
+                {translating ? "Çeviriliyor..." : "🌐 Otomatik Çevir"}
+              </button>
+            </div>
+            {transStatus && transStatus.includes("Brand") && (
+              <p className={`mb-3 text-xs font-medium ${transStatus.startsWith("✓") ? "text-green-600" : "text-red-600"}`}>
+                {transStatus}
+              </p>
+            )}
+            <div className="space-y-4">
+              {[
+                { key: "brand_title", label: "Başlık — Türkçe", multiline: false },
+                { key: "brand_text",  label: "Metin — Türkçe",  multiline: true  },
+                { key: "brand_title_en", label: "Başlık — English", multiline: false },
+                { key: "brand_text_en",  label: "Metin — English",  multiline: true  },
+                { key: "brand_title_ru", label: "Başlık — Русский", multiline: false },
+                { key: "brand_text_ru",  label: "Metin — Русский",  multiline: true  },
+                { key: "brand_title_ar", label: "Başlık — العربية", multiline: false },
+                { key: "brand_text_ar",  label: "Metin — العربية",  multiline: true  },
+              ].map(({ key, label, multiline }) => {
+                const s = settings.find((x) => x.key === key)
+                if (!s) return null
+                return (
+                  <div key={key}>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                      {label}
+                    </label>
+                    {multiline ? (
+                      <textarea
+                        rows={3}
+                        value={s.value}
+                        onChange={(e) => updateValue(key, e.target.value)}
+                        className="w-full border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-zinc-900"
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        value={s.value}
+                        onChange={(e) => updateValue(key, e.target.value)}
+                        className="h-10 w-full border border-zinc-200 px-3 text-sm outline-none focus:border-zinc-900"
+                      />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
           {/* İletişim Bilgileri */}
           <div className="border border-zinc-200 bg-white p-6">
             <h2 className="mb-5 text-xs font-bold uppercase tracking-wider text-zinc-500">
@@ -307,7 +441,13 @@ export default function AdminSettingsPage() {
                       value={s.value}
                       onChange={(e) => updateValue(s.key, e.target.value)}
                       className="h-10 w-full border border-zinc-200 px-3 text-sm outline-none focus:border-zinc-900"
-                      placeholder={s.key === "contact_phone" ? "+90 543 841 25 50" : ""}
+                      placeholder={
+                        s.key === "contact_phone"
+                          ? "+90 543 841 25 50"
+                          : s.key === "contact_whatsapp"
+                            ? "905438412550"
+                            : ""
+                      }
                     />
                   </div>
                 ))}
